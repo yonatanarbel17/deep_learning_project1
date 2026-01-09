@@ -31,18 +31,16 @@ def extract_squares_with_padding(
     pad_ratio: float = 0.5
 ) -> List[Image.Image]:
     """
-    Resizes board to board_size x board_size, then cuts 8x8 squares.
+    Cuts 8x8 squares from board (assumed already board_size x board_size).
     Each square includes padding from neighbors to capture pieces that 
     visually "lean" into adjacent squares due to camera angle.
     
     Args:
-        board: Input board image
-        board_size: Size to resize board to (board_size x board_size)
+        board: Input board image (already resized to board_size x board_size)
+        board_size: Expected board dimensions
         square_size: Output size for each extracted square
         pad_ratio: How much of adjacent squares to include (0.5 = half of each neighbor)
     """
-    board = board.resize((board_size, board_size), Image.BILINEAR)
-
     edges = np.round(np.linspace(0, board_size, 9)).astype(int)  # 0..board_size
     squares: List[Image.Image] = []
 
@@ -173,15 +171,15 @@ class ChessboardDataset(Dataset):
 # -----------------------------
 # Transforms + Dataloaders
 # -----------------------------
-def get_default_transforms(square_size: int = 224, is_training: bool = True) -> Callable:
+def get_default_transforms(is_training: bool = True) -> Callable:
     """
+    Transforms for square images (already resized to square_size in extract_squares_with_padding).
     Note: We DON'T do RandomRotation here, because we already handle 90/180/270 at the board level.
     """
     from torchvision import transforms  # type: ignore
 
     if is_training:
         return transforms.Compose([
-            transforms.Resize((square_size, square_size)),
             transforms.ColorJitter(brightness=0.25, contrast=0.25, saturation=0.15),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406],
@@ -191,7 +189,6 @@ def get_default_transforms(square_size: int = 224, is_training: bool = True) -> 
         ])
     else:
         return transforms.Compose([
-            transforms.Resize((square_size, square_size)),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                  std=[0.229, 0.224, 0.225])
@@ -206,8 +203,8 @@ def create_dataloaders(
     square_size: int = 224,
     board_size: int = 512
 ) -> Tuple[DataLoader, DataLoader]:
-    train_transform = get_default_transforms(square_size=square_size, is_training=True)
-    val_transform = get_default_transforms(square_size=square_size, is_training=False)
+    train_transform = get_default_transforms(is_training=True)
+    val_transform = get_default_transforms(is_training=False)
 
     train_dataset = ChessboardDataset(
         df=train_df,
