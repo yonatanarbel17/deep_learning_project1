@@ -1,0 +1,39 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Model weights (optional - uncomment if you don't want to commit large .pth files)
+# *.pth
+# outputs/*.pth
+
+# Large output files (optional - uncomment if outputs are too large)
+# outputs/*.png
+# outputs/*.jpg
+
+# Environment
+venv/
+env/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Logs
+*.log
