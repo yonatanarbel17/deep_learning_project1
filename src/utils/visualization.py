@@ -30,27 +30,29 @@ def plot_training_curves(
     """
     df = pd.read_csv(csv_path)
     
-    fig, axes = plt.subplots(1, 2, figsize=(14, 5))
+    fig, axes = plt.subplots(1, 2, figsize=(18, 7))
     
     # Loss curves
     ax1 = axes[0]
-    ax1.plot(df['epoch'], df['train_loss'], 'b-', label='Train Loss', linewidth=2)
-    ax1.plot(df['epoch'], df['val_loss'], 'r--', label='Val Loss', linewidth=2)
-    ax1.set_xlabel('Epoch', fontsize=12)
-    ax1.set_ylabel('Cross Entropy Loss', fontsize=12)
-    ax1.set_title('Training & Validation Loss', fontsize=14)
-    ax1.legend(fontsize=11)
+    ax1.plot(df['epoch'], df['train_loss'], 'b-', label='Train Loss', linewidth=3)
+    ax1.plot(df['epoch'], df['val_loss'], 'r--', label='Val Loss', linewidth=3)
+    ax1.set_xlabel('Epoch', fontsize=16)
+    ax1.set_ylabel('Cross Entropy Loss', fontsize=16)
+    ax1.set_title('Training & Validation Loss', fontsize=18)
+    ax1.legend(fontsize=14)
     ax1.grid(True, alpha=0.3)
+    ax1.tick_params(labelsize=14)
     
     # Accuracy curves
     ax2 = axes[1]
-    ax2.plot(df['epoch'], df['train_acc'] * 100, 'g-', label='Train Acc', linewidth=2)
-    ax2.plot(df['epoch'], df['val_acc'] * 100, 'orange', linestyle='--', label='Val Acc', linewidth=2)
-    ax2.set_xlabel('Epoch', fontsize=12)
-    ax2.set_ylabel('Accuracy (%)', fontsize=12)
-    ax2.set_title('Training & Validation Accuracy', fontsize=14)
-    ax2.legend(fontsize=11)
+    ax2.plot(df['epoch'], df['train_acc'] * 100, 'g-', label='Train Acc', linewidth=3)
+    ax2.plot(df['epoch'], df['val_acc'] * 100, 'orange', linestyle='--', label='Val Acc', linewidth=3)
+    ax2.set_xlabel('Epoch', fontsize=16)
+    ax2.set_ylabel('Accuracy (%)', fontsize=16)
+    ax2.set_title('Training & Validation Accuracy', fontsize=18)
+    ax2.legend(fontsize=14)
     ax2.grid(True, alpha=0.3)
+    ax2.tick_params(labelsize=14)
     
     # Add best validation accuracy annotation
     best_idx = df['val_acc'].idxmax()
@@ -59,7 +61,7 @@ def plot_training_curves(
     ax2.annotate(f'Best: {best_acc:.1f}%\n(Epoch {best_epoch})',
                 xy=(best_epoch, best_acc),
                 xytext=(best_epoch + 1, best_acc - 5),
-                fontsize=10,
+                fontsize=14,
                 arrowprops=dict(arrowstyle='->', color='gray'))
     
     plt.tight_layout()
@@ -97,7 +99,7 @@ def visualize_prediction(
         12: '·', 'unknown': '?'
     }
     
-    fig, ax = plt.subplots(figsize=(10, 10))
+    fig, ax = plt.subplots(figsize=(14, 14))
     
     # Draw board
     for row in range(8):
@@ -116,16 +118,16 @@ def visualize_prediction(
             
             # Draw piece
             ax.text(col + 0.5, 7 - row + 0.5, char,
-                   fontsize=36, ha='center', va='center',
-                   color=text_color)
+                   fontsize=56, ha='center', va='center',
+                   color=text_color, weight='bold')
             
             # Draw confidence if available
             if confidences is not None:
                 conf = confidences[row, col]
                 conf_color = 'green' if conf >= 0.7 else 'orange' if conf >= 0.4 else 'red'
                 ax.text(col + 0.85, 7 - row + 0.15, f'{conf:.2f}',
-                       fontsize=8, ha='right', va='bottom',
-                       color=conf_color)
+                       fontsize=14, ha='right', va='bottom',
+                       color=conf_color, weight='bold')
     
     # Labels
     ax.set_xlim(0, 8)
@@ -134,14 +136,14 @@ def visualize_prediction(
     
     # File labels (a-h)
     for i, label in enumerate('abcdefgh'):
-        ax.text(i + 0.5, -0.3, label, fontsize=12, ha='center')
+        ax.text(i + 0.5, -0.3, label, fontsize=18, ha='center', weight='bold')
     
     # Rank labels (1-8)
     for i in range(8):
-        ax.text(-0.3, i + 0.5, str(i + 1), fontsize=12, ha='center', va='center')
+        ax.text(-0.3, i + 0.5, str(i + 1), fontsize=18, ha='center', va='center', weight='bold')
     
     ax.axis('off')
-    ax.set_title(f'{title}\nFEN: {fen}', fontsize=14)
+    ax.set_title(f'{title}\nFEN: {fen}', fontsize=20, weight='bold')
     
     plt.tight_layout()
     
