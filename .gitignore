@@ -34,10 +34,5 @@ myenv/
 # Logs
 *.log
 
-# Large raw video frame folders (games 8-10 have thousands of frames)
-data/game8_per_frame/images/
-data/game9_per_frame/images/
-data/game10_per_frame/images/
-
 # Test occlusion folder
 data/test_occlusion/
