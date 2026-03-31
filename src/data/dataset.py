@@ -3,6 +3,7 @@ PyTorch Dataset for chessboard square classification (BOARD-LEVEL).
 - Loads one image = returns 64 squares in one go.
 - Extracts squares with padding (context).
 - Optional rotation augmentation with matching label rotation.
+- Optional perspective transformation for top-down view.
 """
 
 from __future__ import annotations
@@ -19,6 +20,45 @@ import torch  # type: ignore
 from torch.utils.data import Dataset, DataLoader  # type: ignore
 
 from .data_loader import fen_to_labels
+from .board_detection import get_chess_board_upper_look
+
+
+# -------- Class weight computation --------
+def compute_class_weights(train_df: pd.DataFrame, num_classes: int = 14) -> torch.Tensor:
+    """
+    Compute inverse-frequency class weights from training data.
+
+    Args:
+        train_df: DataFrame with 'fen' column containing FEN strings
+        num_classes: Number of classes (default 14)
+
+    Returns:
+        torch.FloatTensor of shape (num_classes,) with normalized inverse-frequency weights
+    """
+    # Count occurrences of each class
+    class_counts = np.zeros(num_classes)
+
+    for _, row in train_df.iterrows():
+        fen = row['fen']
+        labels = fen_to_labels(fen, flatten=True)  # (64,)
+        for label in labels:
+            class_counts[int(label)] += 1
+
+    # Compute inverse-frequency weights
+    # For zero-count classes, assign weight 1.0
+    weights = np.zeros(num_classes)
+    total_samples = class_counts.sum()
+
+    for c in range(num_classes):
+        if class_counts[c] > 0:
+            weights[c] = total_samples / (num_classes * class_counts[c])
+        else:
+            weights[c] = 1.0
+
+    # Normalize so they sum to num_classes
+    weights = weights * num_classes / weights.sum()
+
+    return torch.FloatTensor(weights)
 
 
 # -----------------------------
@@ -105,7 +145,8 @@ class ChessboardDataset(Dataset):
         board_size: int = 512,
         square_size: int = 224,
         pad_ratio: float = 0.5,
-        rotation_augment: bool = True
+        rotation_augment: bool = True,
+        use_perspective_transform: bool = True
     ):
         self.df = df.reset_index(drop=True)
         self.transform = transform
@@ -113,6 +154,7 @@ class ChessboardDataset(Dataset):
         self.square_size = square_size
         self.pad_ratio = pad_ratio
         self.rotation_augment = rotation_augment
+        self.use_perspective_transform = use_perspective_transform
 
         required_cols = ["image_path", "fen"]
         for col in required_cols:
@@ -133,8 +175,13 @@ class ChessboardDataset(Dataset):
 
         board_img = Image.open(img_path).convert("RGB")
 
-        # 2) Resize to board_size x board_size
-        board_resized = board_img.resize((self.board_size, self.board_size), Image.BILINEAR)
+        # 2) Apply perspective transformation to get top-down view
+        # This detects board corners and warps to perfect square
+        board_resized = get_chess_board_upper_look(
+            board_img,
+            output_size=self.board_size,
+            use_perspective=self.use_perspective_transform
+        )
 
         # 3) Labels from FEN (8x8)
         labels_8x8 = fen_to_labels(fen, flatten=False)  # (8,8)
@@ -181,6 +228,8 @@ def get_default_transforms(is_training: bool = True) -> Callable:
     if is_training:
         return transforms.Compose([
             transforms.ColorJitter(brightness=0.25, contrast=0.25, saturation=0.15),
+            transforms.RandomAffine(degrees=3, translate=(0.03, 0.03)),
+            transforms.RandomApply([transforms.GaussianBlur(kernel_size=3, sigma=(0.1, 1.0))], p=0.2),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                  std=[0.229, 0.224, 0.225]),
@@ -201,7 +250,8 @@ def create_dataloaders(
     batch_size: int = 8,       # now it's "boards per batch"
     num_workers: int = 4,
     square_size: int = 224,
-    board_size: int = 512
+    board_size: int = 512,
+    use_perspective_transform: bool = True
 ) -> Tuple[DataLoader, DataLoader]:
     train_transform = get_default_transforms(is_training=True)
     val_transform = get_default_transforms(is_training=False)
@@ -211,7 +261,8 @@ def create_dataloaders(
         transform=train_transform,
         board_size=board_size,
         square_size=square_size,
-        rotation_augment=True
+        rotation_augment=True,
+        use_perspective_transform=use_perspective_transform
     )
 
     val_dataset = ChessboardDataset(
@@ -219,7 +270,8 @@ def create_dataloaders(
         transform=val_transform,
         board_size=board_size,
         square_size=square_size,
-        rotation_augment=False  # keep validation stable
+        rotation_augment=False,  # keep validation stable
+        use_perspective_transform=use_perspective_transform
     )
 
     train_loader = DataLoader(

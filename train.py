@@ -17,15 +17,17 @@ This script:
 import os
 import sys
 import argparse
+import random
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 import torch
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from data.dataset import ChessboardDataset, get_default_transforms, create_dataloaders
+from data.dataset import ChessboardDataset, get_default_transforms, create_dataloaders, compute_class_weights
 from models.classifier import create_model
 from training.trainer import Trainer, get_device
 from inference.predictor import find_optimal_threshold
@@ -154,14 +156,21 @@ def main():
                        help="DataLoader workers (0 for MacBook)")
     parser.add_argument("--games", type=str, default=None,
                        help="Comma-separated game numbers to use (default: all)")
-    
+
     args = parser.parse_args()
-    
+
+    # Set random seeds for reproducibility
+    torch.manual_seed(42)
+    np.random.seed(42)
+    random.seed(42)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(42)
+
     # Parse game numbers
     game_numbers = None
     if args.games:
         game_numbers = [int(g.strip()) for g in args.games.split(",")]
-    
+
     # Setup
     os.makedirs(args.output_dir, exist_ok=True)
     device = get_device()
@@ -192,7 +201,8 @@ def main():
         batch_size=args.batch_size,
         num_workers=args.num_workers,
         square_size=args.square_size,
-        board_size=args.board_size
+        board_size=args.board_size,
+        use_perspective_transform=True  # Enable perspective transformation for top-down view
     )
     
     # Create model
@@ -202,7 +212,13 @@ def main():
         pretrained=True,
         freeze_backbone=False
     )
-    
+
+    # Compute class weights
+    print("\nComputing class weights...")
+    class_weights = compute_class_weights(train_df, num_classes=14)
+    class_weights = class_weights.to(device)
+    print(f"Class weights: {class_weights}")
+
     # Train
     print(f"\nStarting training for {args.epochs} epochs...")
     trainer = Trainer(
@@ -211,9 +227,10 @@ def main():
         val_loader=val_loader,
         device=device,
         output_dir=args.output_dir,
-        learning_rate=args.lr
+        learning_rate=args.lr,
+        class_weights=class_weights
     )
-    
+
     history = trainer.train(num_epochs=args.epochs)
     
     # Generate visualizations

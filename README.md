@@ -6,7 +6,7 @@ This project implements a deep learning system to classify each of the 64 chessb
 
 ### Problem Statement
 Given a single static image of a real chessboard, the system must:
-- Classify each square into one of 13 classes (12 piece types × 2 colors + empty)
+- Classify each square into one of 14 classes (12 piece types × 2 colors + empty + occluded)
 - Handle occlusions (hands, heads, etc.) by outputting "unknown" for occluded squares
 - Reconstruct the board state as a FEN string
 - Generate a digital chess diagram from the FEN
@@ -32,26 +32,28 @@ Each game is provided as a ZIP file containing:
 
 The system uses a modular pipeline approach:
 
-1. **Spatial Transformer Network (STN)**: Rectifies and warps the board image to a canonical top-down view
+1. **Board Detection & Perspective Correction**: Rectifies and warps the board image to a canonical top-down view
+   - Uses OpenCV contour and corner detection to locate the chessboard
+   - Applies perspective transformation to ensure consistent square positioning
    - Handles perspective distortion and rotation
-   - Ensures consistent square positioning
 
 2. **Square Extraction**: Divides the rectified board into 64 individual square images
-   - Each square is processed independently
+   - Each square is processed independently with configurable padding
    - Enables treating each square as a separate training sample
 
 3. **Out-of-Distribution (OOD) Detection**: Identifies occluded or uncertain squares
-   - **Autoencoder-based**: Trained only on clean squares; high reconstruction error indicates occlusion
-   - **Entropy-based**: High entropy in classifier output indicates uncertainty
+   - **Confidence Thresholding**: Uses softmax max probability as confidence score
+   - **Supervised Occlusion Class**: Dedicated class (ID 13) for occluded squares detected by the classifier
    - Squares flagged as OOD are marked as "unknown"
 
-4. **ResNet-18 Classifier**: Performs 13-class classification
+4. **ResNet-18 Classifier**: Performs 14-class classification
    - 12 piece classes (6 white + 6 black pieces)
    - 1 empty square class
+   - 1 occluded/uncertain square class
    - Uses pre-trained ImageNet weights for transfer learning
 
 5. **FEN Reconstruction**: Combines 64 square predictions into FEN notation
-   - Handles "unknown" squares appropriately
+   - Handles "unknown" and occluded squares appropriately
    - Generates digital chess diagram using `python-chess`
 
 ## Project Structure
@@ -68,23 +70,20 @@ DL_project/
 │   └── ...
 ├── src/
 │   ├── data/               # Data loading utilities
-│   │   └── data_loader.py  # FEN parsing and data loading utilities
+│   │   ├── data_loader.py  # FEN parsing and data loading utilities
+│   │   ├── dataset.py      # PyTorch Dataset and DataLoaders
+│   │   └── board_detection.py # Board detection and perspective correction
 │   ├── models/             # Model architectures
-│   │   ├── stn.py          # Spatial Transformer Network
-│   │   ├── autoencoder.py  # OOD detection via reconstruction
-│   │   ├── classifier.py   # ResNet-18 classifier
-│   │   └── pipeline.py     # Combined model pipeline
+│   │   └── classifier.py   # ResNet-18 classifier
+│   ├── inference/          # Inference utilities
+│   │   └── predictor.py    # Prediction and threshold optimization
 │   ├── utils/              # Utility functions
-│   │   ├── fen_utils.py    # FEN generation and parsing
-│   │   └── visualization.py # Chess diagram generation
+│   │   └── visualization.py # Training curves and reporting
 │   └── training/           # Training scripts
-│       └── train.py         # Main training script
-├── configs/                # Configuration files
-│   └── config.yaml         # Training and model hyperparameters
-├── checkpoints/            # Saved model checkpoints
+│       └── trainer.py      # Main training engine
 ├── outputs/                # Output predictions and diagrams
-├── logs/                   # Training logs and TensorBoard files
 ├── requirements.txt        # Python dependencies
+├── pyproject.toml         # Project configuration
 └── README.md              # This file
 ```
 
@@ -113,25 +112,23 @@ DL_project/
    pip install -r requirements.txt
    ```
 
-3. **Configure**: Edit `configs/config.yaml` to set:
-   - Which games to use for training/validation
-   - Model hyperparameters
-   - Training settings
-
 ## Usage
 
 ### Training
 
 Train the model with game-based data splitting:
 ```bash
-python src/training/train.py --config configs/config.yaml
+python train.py --data_root ./data --epochs 15 --batch_size 4
 ```
 
 The training script will:
-- Load games specified in config (e.g., games 1-4 for training, game 5 for validation)
+- Load all games from the specified directory
+- Split data by game to prevent leakage (80/20 train/val split)
 - Extract squares from board images
 - Train the classifier with proper data augmentation
-- Save checkpoints and training metrics
+- Save model checkpoints and training metrics
+- Apply learning rate scheduling and early stopping
+- Optimize confidence threshold for OOD detection
 
 ### Inference
 
@@ -163,16 +160,18 @@ The inference script will:
 - Shuffling breaks temporal correlation between frames
 
 ### Model Training
-- Cross-entropy loss with LogSumExp trick for numerical stability
-- Adam optimizer with learning rate scheduling
-- Early stopping based on validation accuracy
-- TensorBoard logging for training visualization
+- Cross-entropy loss with learned class weights (inverse-frequency weighting)
+- AdamW optimizer with learning rate scheduling (ReduceLROnPlateau)
+- Gradient clipping (max_norm=1.0) for stability
+- Early stopping based on validation accuracy (patience=5 epochs)
+- Data augmentation: color jitter, random affine, Gaussian blur, random erasing
+- Comprehensive training history logging with learning rates per epoch
 
 ### Occlusion Handling
-- Autoencoder trained only on clean squares (pieces + empty)
-- Reconstruction error threshold determines if square is occluded
-- Entropy of classifier output provides additional uncertainty measure
-- Squares with high uncertainty marked as "unknown"
+- Supervised occlusion class (class 13) for explicitly labeled occluded squares
+- Confidence thresholding based on softmax max probability
+- Optimal threshold automatically determined on validation set
+- Squares with low confidence or predicted as occluded marked as "unknown"
 
 ## References
 

@@ -33,25 +33,43 @@ class Trainer:
         device: torch.device,
         output_dir: str = "outputs",
         learning_rate: float = 1e-4,
-        weight_decay: float = 1e-4
+        weight_decay: float = 1e-3,
+        patience: int = 5,
+        lr_scheduler_patience: int = 3,
+        class_weights: torch.Tensor = None
     ):
         self.model = model.to(device)
         self.train_loader = train_loader
         self.val_loader = val_loader
         self.device = device
         self.output_dir = output_dir
-        
+        self.patience = patience
+        self.lr_scheduler_patience = lr_scheduler_patience
+
         os.makedirs(output_dir, exist_ok=True)
-        
-        self.criterion = nn.CrossEntropyLoss()
+
+        if class_weights is not None:
+            self.criterion = nn.CrossEntropyLoss(weight=class_weights)
+        else:
+            self.criterion = nn.CrossEntropyLoss()
+
         self.optimizer = optim.AdamW(
             model.parameters(),
             lr=learning_rate,
             weight_decay=weight_decay
         )
-        
+
+        self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+            self.optimizer,
+            mode='max',
+            patience=lr_scheduler_patience,
+            factor=0.5,
+            verbose=True
+        )
+
         self.history: List[Dict] = []
         self.best_val_acc = 0.0
+        self.epochs_without_improvement = 0
     
     def train_epoch(self) -> Tuple[float, float]:
         """Run one training epoch. Returns (loss, accuracy)."""
@@ -67,7 +85,7 @@ class Trainer:
             
             # Reshape for loss computation
             B = squares.shape[0]
-            logits = self.model(squares)  # (B, 64, 13)
+            logits = self.model(squares)  # (B, 64, num_classes)
             
             # Flatten for CrossEntropyLoss: (B*64, 13) vs (B*64,)
             logits_flat = logits.view(-1, logits.shape[-1])
@@ -77,6 +95,7 @@ class Trainer:
             
             self.optimizer.zero_grad()
             loss.backward()
+            torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
             self.optimizer.step()
             
             total_loss += loss.item() * B
@@ -119,8 +138,8 @@ class Trainer:
     
     def train(self, num_epochs: int = 15) -> pd.DataFrame:
         """
-        Full training loop with validation.
-        
+        Full training loop with validation, early stopping, and LR scheduling.
+
         Returns:
             DataFrame with training history
         """
@@ -128,20 +147,26 @@ class Trainer:
         print(f"Train samples: {len(self.train_loader.dataset)} boards ({len(self.train_loader.dataset)*64} squares)")
         print(f"Val samples: {len(self.val_loader.dataset)} boards ({len(self.val_loader.dataset)*64} squares)")
         print("-" * 60)
-        
+
         start_time = time.time()
-        
+
         for epoch in range(1, num_epochs + 1):
             epoch_start = time.time()
-            
+
             # Train
             train_loss, train_acc = self.train_epoch()
-            
+
             # Validate
             val_loss, val_acc = self.validate()
-            
+
+            # Step scheduler based on validation accuracy
+            self.scheduler.step(val_acc)
+
             epoch_time = time.time() - epoch_start
-            
+
+            # Get current learning rate
+            current_lr = self.optimizer.param_groups[0]['lr']
+
             # Record history
             epoch_data = {
                 "epoch": epoch,
@@ -149,35 +174,44 @@ class Trainer:
                 "train_acc": train_acc,
                 "val_loss": val_loss,
                 "val_acc": val_acc,
-                "epoch_time_sec": epoch_time
+                "epoch_time_sec": epoch_time,
+                "lr": current_lr
             }
             self.history.append(epoch_data)
-            
-            # Save best model
+
+            # Save best model and track improvement
             if val_acc > self.best_val_acc:
                 self.best_val_acc = val_acc
-                torch.save(self.model.state_dict(), 
+                self.epochs_without_improvement = 0
+                torch.save(self.model.state_dict(),
                           os.path.join(self.output_dir, "best_model.pth"))
-            
+            else:
+                self.epochs_without_improvement += 1
+
             # Print progress
             print(f"Epoch {epoch:3d}/{num_epochs} | "
                   f"Train Loss: {train_loss:.4f} | Train Acc: {train_acc:.4f} | "
                   f"Val Loss: {val_loss:.4f} | Val Acc: {val_acc:.4f} | "
-                  f"Time: {epoch_time:.1f}s")
-        
+                  f"LR: {current_lr:.2e} | Time: {epoch_time:.1f}s")
+
+            # Early stopping
+            if self.epochs_without_improvement >= self.patience:
+                print(f"\nEarly stopping triggered after {self.epochs_without_improvement} epochs without improvement")
+                break
+
         total_time = time.time() - start_time
         print("-" * 60)
         print(f"Training complete in {total_time/60:.1f} minutes")
         print(f"Best validation accuracy: {self.best_val_acc:.4f}")
-        
+
         # Save final model
-        torch.save(self.model.state_dict(), 
+        torch.save(self.model.state_dict(),
                   os.path.join(self.output_dir, "final_model.pth"))
-        
+
         # Save training summary
         history_df = pd.DataFrame(self.history)
         history_df.to_csv(os.path.join(self.output_dir, "training_summary.csv"), index=False)
-        
+
         return history_df
 
 

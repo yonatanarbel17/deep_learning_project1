@@ -1,25 +1,36 @@
 """
 Inference module for chess board prediction.
-Handles OOD detection via confidence thresholding and FEN reconstruction.
+Handles OOD detection via confidence thresholding, supervised occlusion
+class (ID 13), and FEN reconstruction.
+
+Hybrid decision logic:
+  - If predicted class == 13 (supervised occlusion) -> 'unknown'
+  - If confidence < threshold (OOD fallback)         -> 'unknown'
+  - Otherwise                                        -> predicted class
 """
 
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
+import sys
+from pathlib import Path
 from typing import Tuple, Optional
 from torch.utils.data import DataLoader
 
-import sys
-sys.path.append('..')
-from data.data_loader import grid_to_fen, ID_TO_PIECE
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from data.data_loader import grid_to_fen, ID_TO_PIECE, NUM_CLASSES
+
+OCCLUDED_CLASS_ID = 13
 
 
 class BoardPredictor:
     """
-    Predicts board state from square images with OOD handling.
+    Predicts board state from square images with hybrid OOD + occlusion handling.
     
-    Uses confidence thresholding to mark uncertain predictions as 'unknown'.
+    A square is marked 'unknown' when either:
+      1. The model confidently predicts the supervised occlusion class (ID 13), or
+      2. The model's max confidence falls below the OOD threshold.
     """
     
     def __init__(
@@ -32,6 +43,16 @@ class BoardPredictor:
         self.model.eval()
         self.device = device
         self.threshold = threshold
+    
+    @staticmethod
+    def _apply_hybrid_filter(predictions: np.ndarray, confidences: np.ndarray, threshold: float) -> np.ndarray:
+        """Apply the hybrid occlusion + OOD filter to raw predictions."""
+        predictions = predictions.astype(object)
+        # Supervised occlusion: model predicts class 13
+        predictions[predictions == OCCLUDED_CLASS_ID] = 'unknown'
+        # OOD fallback: low confidence on any class
+        predictions[confidences < threshold] = 'unknown'
+        return predictions
     
     @torch.no_grad()
     def predict_board(
@@ -51,32 +72,22 @@ class BoardPredictor:
             fen: FEN string (treats 'unknown' as empty)
             confidences: Optional 8x8 array of confidence scores
         """
-        # Add batch dimension if needed
         if squares_tensor.dim() == 4:
-            squares_tensor = squares_tensor.unsqueeze(0)  # (1, 64, 3, H, W)
+            squares_tensor = squares_tensor.unsqueeze(0)
         
         squares_tensor = squares_tensor.to(self.device)
         
-        # Forward pass
-        logits = self.model(squares_tensor)  # (1, 64, 13)
-        probs = F.softmax(logits, dim=-1)    # (1, 64, 13)
+        logits = self.model(squares_tensor)
+        probs = F.softmax(logits, dim=-1)
+        confidences, predictions = torch.max(probs, dim=-1)
         
-        # Get predictions and confidences
-        confidences, predictions = torch.max(probs, dim=-1)  # (1, 64)
+        confidences = confidences.squeeze(0).cpu().numpy()
+        predictions = predictions.squeeze(0).cpu().numpy()
         
-        # Move to CPU
-        confidences = confidences.squeeze(0).cpu().numpy()  # (64,)
-        predictions = predictions.squeeze(0).cpu().numpy()   # (64,)
+        predictions = self._apply_hybrid_filter(predictions, confidences, self.threshold)
         
-        # Apply OOD threshold
-        predictions = predictions.astype(object)  # Allow string values
-        predictions[confidences < self.threshold] = 'unknown'
-        
-        # Reshape to 8x8
         grid = predictions.reshape(8, 8)
         confidences_grid = confidences.reshape(8, 8)
-        
-        # Generate FEN
         fen = grid_to_fen(grid)
         
         if return_confidences:
@@ -101,15 +112,14 @@ class BoardPredictor:
         squares_batch = squares_batch.to(self.device)
         B = squares_batch.shape[0]
         
-        logits = self.model(squares_batch)  # (B, 64, 13)
+        logits = self.model(squares_batch)
         probs = F.softmax(logits, dim=-1)
-        confidences, predictions = torch.max(probs, dim=-1)  # (B, 64)
+        confidences, predictions = torch.max(probs, dim=-1)
         
         confidences = confidences.cpu().numpy()
-        predictions = predictions.cpu().numpy().astype(object)
+        predictions = predictions.cpu().numpy()
         
-        # Apply threshold
-        predictions[confidences < self.threshold] = 'unknown'
+        predictions = self._apply_hybrid_filter(predictions, confidences, self.threshold)
         
         grids = predictions.reshape(B, 8, 8)
         fens = [grid_to_fen(grids[i]) for i in range(B)]
@@ -158,7 +168,7 @@ def find_optimal_threshold(
             squares = squares.to(device)
             labels = labels.to(device)
             
-            logits = model(squares)  # (B, 64, 13)
+            logits = model(squares)  # (B, 64, num_classes)
             probs = F.softmax(logits, dim=-1)
             
             all_probs.append(probs.view(-1, probs.shape[-1]))  # (B*64, 13)
@@ -215,27 +225,30 @@ def get_prediction_summary(grid: np.ndarray) -> dict:
         grid: 8x8 prediction grid
         
     Returns:
-        Dictionary with piece counts and unknown count
+        Dictionary with piece counts, unknown/occluded counts
     """
     summary = {
         "white_pieces": 0,
         "black_pieces": 0,
         "empty": 0,
         "unknown": 0,
+        "occluded": 0,
         "pieces": {}
     }
     
     for row in grid:
         for cell in row:
-            if cell == 'unknown':
+            if cell == 'unknown' or cell == 'occluded':
                 summary["unknown"] += 1
+            elif cell == OCCLUDED_CLASS_ID:
+                summary["occluded"] += 1
             elif cell == 12:
                 summary["empty"] += 1
-            elif cell <= 5:
+            elif isinstance(cell, (int, np.integer)) and cell <= 5:
                 summary["white_pieces"] += 1
                 piece = ID_TO_PIECE[int(cell)]
                 summary["pieces"][piece] = summary["pieces"].get(piece, 0) + 1
-            else:
+            elif isinstance(cell, (int, np.integer)):
                 summary["black_pieces"] += 1
                 piece = ID_TO_PIECE[int(cell)]
                 summary["pieces"][piece] = summary["pieces"].get(piece, 0) + 1

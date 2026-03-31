@@ -1,6 +1,6 @@
 """
 Chess square classifier using pretrained ResNet.
-Takes 64 squares from a board and classifies each into 13 piece classes.
+Takes 64 squares from a board and classifies each into piece classes.
 """
 
 import torch
@@ -10,21 +10,23 @@ from torchvision import models  # type: ignore
 
 class ChessSquareClassifier(nn.Module):
     """
-    Classifies individual chess squares into 13 classes:
+    Classifies individual chess squares into 14 classes:
     0-5: White pieces (P, N, B, R, Q, K)
     6-11: Black pieces (p, n, b, r, q, k)
     12: Empty
+    13: Occluded
     
     Input: (B, 64, 3, H, W) - B boards, each with 64 squares
-    Output: (B, 64, 13) - logits for each square
+    Output: (B, 64, 14) - logits for each square
     """
     
     def __init__(
         self,
-        num_classes: int = 13,
+        num_classes: int = 14,
         backbone: str = "resnet18",
         pretrained: bool = True,
-        freeze_backbone: bool = False
+        freeze_backbone: bool = False,
+        dropout: float = 0.3
     ):
         super().__init__()
         self.num_classes = num_classes
@@ -46,8 +48,11 @@ class ChessSquareClassifier(nn.Module):
         else:
             raise ValueError(f"Unknown backbone: {backbone}")
         
-        # Replace final FC layer for 13-class classification
-        self.backbone.fc = nn.Linear(feature_dim, num_classes)
+        # Replace final FC with dropout + linear for regularization
+        self.backbone.fc = nn.Sequential(
+            nn.Dropout(p=dropout),
+            nn.Linear(feature_dim, num_classes)
+        )
         
         # Optionally freeze backbone (only train final layer)
         if freeze_backbone:
@@ -62,7 +67,7 @@ class ChessSquareClassifier(nn.Module):
                OR (N, 3, H, W) - batch of individual squares
         
         Returns:
-            logits: (B, 64, 13) or (N, 13) - class logits for each square
+            logits: (B, 64, num_classes) or (N, num_classes) - class logits for each square
         """
         input_shape = x.shape
         
@@ -79,7 +84,7 @@ class ChessSquareClassifier(nn.Module):
         return logits
     
     def predict(self, x: torch.Tensor) -> torch.Tensor:
-        """Returns predicted class indices (0-12) for each square."""
+        """Returns predicted class indices for each square."""
         logits = self.forward(x)
         return logits.argmax(dim=-1)
 
@@ -88,13 +93,15 @@ def create_model(
     backbone: str = "resnet18",
     pretrained: bool = True,
     freeze_backbone: bool = False,
-    num_classes: int = 13
+    num_classes: int = 14,
+    dropout: float = 0.3
 ) -> ChessSquareClassifier:
     """Factory function to create the model."""
     return ChessSquareClassifier(
         num_classes=num_classes,
         backbone=backbone,
         pretrained=pretrained,
-        freeze_backbone=freeze_backbone
+        freeze_backbone=freeze_backbone,
+        dropout=dropout
     )
 

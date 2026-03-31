@@ -6,22 +6,24 @@ Handles FEN parsing and label extraction from input data.
 import numpy as np
 from typing import List, Union
 
-# 13 classes total:
-# 0-5: White pieces, 6-11: Black pieces, 12: Empty square
+# 14 classes total:
+# 0-5: White pieces, 6-11: Black pieces, 12: Empty square, 13: Occluded
 PIECE_TO_ID = {
     'P': 0, 'N': 1, 'B': 2, 'R': 3, 'Q': 4, 'K': 5,
     'p': 6, 'n': 7, 'b': 8, 'r': 9, 'q': 10, 'k': 11,
-    'empty': 12
+    'empty': 12,
+    'X': 13
 }
 
 # Inverse mapping: ID -> piece character (for FEN reconstruction)
 ID_TO_PIECE = {
     0: 'P', 1: 'N', 2: 'B', 3: 'R', 4: 'Q', 5: 'K',
     6: 'p', 7: 'n', 8: 'b', 9: 'r', 10: 'q', 11: 'k',
-    12: None  # Empty square
+    12: None,  # Empty square
+    13: 'X'    # Occluded square
 }
 
-NUM_CLASSES = 13
+NUM_CLASSES = 14
 
 
 def parse_fen_to_grid(fen: str) -> List[List[str]]:
@@ -35,7 +37,7 @@ def parse_fen_to_grid(fen: str) -> List[List[str]]:
     if len(ranks) != 8:
         raise ValueError(f"FEN must have 8 ranks, got {len(ranks)}: {fen_board}")
 
-    valid_pieces = set('KQRBNPkqrbnp')
+    valid_pieces = set('KQRBNPkqrbnpX')
     grid: List[List[str]] = []
 
     for rank_idx, rank in enumerate(ranks):
@@ -78,17 +80,18 @@ def fen_to_labels(fen: str, flatten: bool = False) -> np.ndarray:
 
 def grid_to_fen(grid: np.ndarray) -> str:
     """
-    Converts an 8x8 grid of class IDs (or 'unknown') back to a FEN string.
+    Converts an 8x8 grid of class IDs (or 'unknown'/'occluded') back to a FEN string.
     
     Args:
         grid: 8x8 numpy array where each cell is:
               - An integer (0-12) representing a piece class
-              - The string 'unknown' for occluded squares
+              - An integer 13 representing an occluded square
+              - The string 'unknown' or 'occluded' for uncertain squares
     
     Returns:
         FEN string (board placement only, no castling/en-passant info)
         
-    Note: 'unknown' and empty (12) are both treated as empty squares in FEN.
+    Note: 'unknown', 'occluded', and empty (12) are all treated as empty squares in FEN.
     """
     fen_ranks = []
     
@@ -97,11 +100,9 @@ def grid_to_fen(grid: np.ndarray) -> str:
         empty_count = 0
         
         for cell in row:
-            # Handle 'unknown' string or empty class (12)
-            if cell == 'unknown' or cell == 12:
+            if cell == 'unknown' or cell == 'occluded' or cell == 12 or cell == 13:
                 empty_count += 1
             else:
-                # It's a piece (0-11)
                 piece_char = ID_TO_PIECE.get(int(cell))
                 if piece_char is None:
                     empty_count += 1
@@ -111,7 +112,6 @@ def grid_to_fen(grid: np.ndarray) -> str:
                         empty_count = 0
                     rank_str += piece_char
         
-        # Flush remaining empty squares
         if empty_count > 0:
             rank_str += str(empty_count)
         

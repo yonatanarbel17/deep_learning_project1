@@ -18,6 +18,7 @@ import numpy as np
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from data.dataset import extract_squares_with_padding, get_default_transforms
+from data.board_detection import get_chess_board_upper_look
 from data.data_loader import grid_to_fen, fen_to_labels, ID_TO_PIECE
 from models.classifier import create_model
 from inference.predictor import BoardPredictor
@@ -191,7 +192,8 @@ def main():
     
     # Load and process image
     img = Image.open(img_path).convert("RGB")
-    img_resized = img.resize((512, 512), Image.BILINEAR)
+    # Apply perspective transformation to get top-down view
+    img_resized = get_chess_board_upper_look(img, output_size=512, use_perspective=True)
     
     # Extract squares
     squares = extract_squares_with_padding(

@@ -92,11 +92,10 @@ def visualize_prediction(
         output_path: Where to save the visualization
         title: Plot title
     """
-    # Map class IDs to display characters
     id_to_char = {
         0: '♙', 1: '♘', 2: '♗', 3: '♖', 4: '♕', 5: '♔',
         6: '♟', 7: '♞', 8: '♝', 9: '♜', 10: '♛', 11: '♚',
-        12: '·', 'unknown': '?'
+        12: '·', 13: '✕', 'unknown': '?', 'occluded': '✕'
     }
     
     fig, ax = plt.subplots(figsize=(14, 14))
@@ -113,8 +112,7 @@ def visualize_prediction(
             cell = grid[row, col]
             char = id_to_char.get(cell, '?')
             
-            # Color for unknown
-            text_color = 'red' if cell == 'unknown' else 'black'
+            text_color = 'red' if cell in ('unknown', 'occluded', 13) else 'black'
             
             # Draw piece
             ax.text(col + 0.5, 7 - row + 0.5, char,

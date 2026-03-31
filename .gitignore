@@ -19,21 +19,25 @@ __pycache__/
 *.swo
 *~
 
-# Model weights (optional - uncomment if you don't want to commit large .pth files)
-# *.pth
-# outputs/*.pth
-
-# Large output files (optional - uncomment if outputs are too large)
-# outputs/*.png
-# outputs/*.jpg
+# Model weights
+*.pth
 
 # Environment
 venv/
 env/
 ENV/
+myenv/
 
 # Jupyter
 .ipynb_checkpoints/
 
 # Logs
 *.log
+
+# Large raw video frame folders (games 8-10 have thousands of frames)
+data/game8_per_frame/images/
+data/game9_per_frame/images/
+data/game10_per_frame/images/
+
+# Test occlusion folder
+data/test_occlusion/

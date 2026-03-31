@@ -16,7 +16,7 @@ from collections import defaultdict
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from data.dataset import create_dataloaders, get_default_transforms
-from data.data_loader import ID_TO_PIECE, PIECE_TO_ID
+from data.data_loader import ID_TO_PIECE, PIECE_TO_ID, NUM_CLASSES
 from models.classifier import create_model
 from training.trainer import get_device
 from inference.predictor import BoardPredictor
@@ -77,12 +77,12 @@ def analyze_class_performance(model_path, data_root, device, num_samples=500):
     print("PER-CLASS PERFORMANCE")
     print("="*60)
     
-    class_names = ['P', 'N', 'B', 'R', 'Q', 'K', 'p', 'n', 'b', 'r', 'q', 'k', 'empty']
+    class_names = ['P', 'N', 'B', 'R', 'Q', 'K', 'p', 'n', 'b', 'r', 'q', 'k', 'empty', 'occluded']
     class_accuracies = {}
     class_counts = {}
     class_avg_confidence = {}
     
-    for class_id in range(13):
+    for class_id in range(NUM_CLASSES):
         mask = all_labels == class_id
         if mask.sum() == 0:
             continue
@@ -113,7 +113,7 @@ def analyze_class_performance(model_path, data_root, device, num_samples=500):
     print("="*60)
     
     # Build confusion matrix manually
-    cm = np.zeros((13, 13), dtype=int)
+    cm = np.zeros((NUM_CLASSES, NUM_CLASSES), dtype=int)
     for true_label, pred_label in zip(all_labels, all_preds):
         cm[true_label, pred_label] += 1
     
@@ -121,11 +121,11 @@ def analyze_class_performance(model_path, data_root, device, num_samples=500):
     print("\nTop 10 Most Confused Class Pairs:")
     print("-" * 60)
     confusions = []
-    for i in range(13):
-        for j in range(13):
+    for i in range(NUM_CLASSES):
+        for j in range(NUM_CLASSES):
             if i != j and cm[i, j] > 0:
-                true_class = class_names[i] if i < 12 else 'empty'
-                pred_class = class_names[j] if j < 12 else 'empty'
+                true_class = class_names[i]
+                pred_class = class_names[j]
                 confusions.append((cm[i, j], true_class, pred_class))
     
     confusions.sort(reverse=True)
@@ -210,16 +210,16 @@ def analyze_threshold_impact(threshold_file):
 
 def main():
     parser = argparse.ArgumentParser(description="Analyze model weaknesses")
-    parser.add_argument("--model", type=str, 
-                       default="/Users/rodrigo/.cursor/worktrees/DL_project/ebs/outputs/best_model.pth",
+    parser.add_argument("--model", type=str,
+                       default="outputs/best_model.pth",
                        help="Path to model")
     parser.add_argument("--data_root", type=str, default="./data",
                        help="Data root directory")
     parser.add_argument("--training_csv", type=str,
-                       default="/Users/rodrigo/.cursor/worktrees/DL_project/ebs/outputs/training_summary.csv",
+                       default="outputs/training_summary.csv",
                        help="Training summary CSV")
     parser.add_argument("--threshold_file", type=str,
-                       default="/Users/rodrigo/.cursor/worktrees/DL_project/ebs/outputs/optimal_threshold.txt",
+                       default="outputs/optimal_threshold.txt",
                        help="Optimal threshold file")
     parser.add_argument("--num_samples", type=int, default=1000,
                        help="Number of samples to analyze")
