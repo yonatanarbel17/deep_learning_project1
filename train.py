@@ -28,6 +28,7 @@ import torch
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from data.dataset import ChessboardDataset, get_default_transforms, create_dataloaders, compute_class_weights
+from data.data_loader import apply_occlusion_to_fen
 from models.classifier import create_model
 from training.trainer import Trainer, get_device
 from inference.predictor import find_optimal_threshold
@@ -96,9 +97,14 @@ def load_all_games(data_root: str, game_numbers: list = None) -> pd.DataFrame:
             if not img_path.exists():
                 continue
             
+            # Apply occlusion markings to FEN if present
+            fen = row['fen']
+            if 'occluded' in df.columns and pd.notna(row.get('occluded')) and str(row['occluded']).strip():
+                fen = apply_occlusion_to_fen(fen, row['occluded'])
+
             all_data.append({
                 "image_path": str(img_path),
-                "fen": row['fen'],
+                "fen": fen,
                 "game_id": game_num
             })
     

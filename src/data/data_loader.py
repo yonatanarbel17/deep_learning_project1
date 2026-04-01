@@ -26,6 +26,58 @@ ID_TO_PIECE = {
 NUM_CLASSES = 14
 
 
+def apply_occlusion_to_fen(fen: str, occluded_squares: str) -> str:
+    """
+    Replace specified squares in FEN with 'X' (occluded marker).
+
+    Args:
+        fen: Board-placement FEN string (e.g. "rnbqkbnr/pppppppp/...")
+        occluded_squares: Comma-separated chess squares (e.g. "c1,d1,e1,f1,h7,h8")
+
+    Returns:
+        Modified FEN with 'X' at the occluded positions.
+    """
+    if not occluded_squares or (isinstance(occluded_squares, float)):
+        return fen  # NaN or empty
+
+    occluded_squares = str(occluded_squares).strip()
+    if not occluded_squares:
+        return fen
+
+    # Parse FEN into 8x8 grid
+    grid = parse_fen_to_grid(fen)
+
+    # Apply occlusion
+    for sq in occluded_squares.split(","):
+        sq = sq.strip()
+        if len(sq) != 2:
+            continue
+        file_ch, rank_ch = sq[0], sq[1]
+        col = ord(file_ch) - ord('a')  # a=0 .. h=7
+        row = 8 - int(rank_ch)         # rank8=row0 .. rank1=row7
+        if 0 <= row < 8 and 0 <= col < 8:
+            grid[row][col] = 'X'
+
+    # Rebuild FEN string from grid
+    ranks = []
+    for row in grid:
+        rank_str = ""
+        empty_count = 0
+        for cell in row:
+            if cell == 'empty':
+                empty_count += 1
+            else:
+                if empty_count > 0:
+                    rank_str += str(empty_count)
+                    empty_count = 0
+                rank_str += cell
+        if empty_count > 0:
+            rank_str += str(empty_count)
+        ranks.append(rank_str)
+
+    return "/".join(ranks)
+
+
 def parse_fen_to_grid(fen: str) -> List[List[str]]:
     """
     Converts a FEN board string into an 8x8 grid of piece identifiers.
