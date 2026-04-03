@@ -26,7 +26,8 @@ class ChessSquareClassifier(nn.Module):
         backbone: str = "resnet18",
         pretrained: bool = True,
         freeze_backbone: bool = False,
-        dropout: float = 0.3
+        dropout: float = 0.3,
+        freeze_ratio: float = 0.0
     ):
         super().__init__()
         self.num_classes = num_classes
@@ -78,7 +79,25 @@ class ChessSquareClassifier(nn.Module):
             for name, param in self.backbone.named_parameters():
                 if classifier_attr not in name:
                     param.requires_grad = False
+
+        # Partial freezing: freeze the first freeze_ratio of backbone layers
+        if freeze_ratio > 0.0 and not freeze_backbone:
+            self._freeze_early_layers(freeze_ratio)
     
+    def _freeze_early_layers(self, ratio: float):
+        """Freeze the first `ratio` fraction of backbone parameters (excluding classifier)."""
+        classifier_attr = self._classifier_attr
+        all_params = [
+            (name, param) for name, param in self.backbone.named_parameters()
+            if classifier_attr not in name
+        ]
+        n_freeze = int(len(all_params) * ratio)
+        for i, (name, param) in enumerate(all_params):
+            if i < n_freeze:
+                param.requires_grad = False
+        total = len(all_params)
+        print(f"  Froze {n_freeze}/{total} backbone parameter groups ({ratio:.0%})")
+
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """
         Args:
@@ -113,7 +132,8 @@ def create_model(
     pretrained: bool = True,
     freeze_backbone: bool = False,
     num_classes: int = 14,
-    dropout: float = 0.3
+    dropout: float = 0.3,
+    freeze_ratio: float = 0.0
 ) -> ChessSquareClassifier:
     """Factory function to create the model."""
     return ChessSquareClassifier(
@@ -121,6 +141,7 @@ def create_model(
         backbone=backbone,
         pretrained=pretrained,
         freeze_backbone=freeze_backbone,
-        dropout=dropout
+        dropout=dropout,
+        freeze_ratio=freeze_ratio
     )
 

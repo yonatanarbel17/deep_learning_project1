@@ -136,29 +136,53 @@ def load_all_games(data_root: str, game_numbers: list = None) -> pd.DataFrame:
     return result_df
 
 
-def split_by_game(df: pd.DataFrame, val_ratio: float = 0.2) -> tuple:
+def split_by_frame_group(df: pd.DataFrame, val_ratio: float = 0.2) -> tuple:
     """
-    Split data by game to prevent data leakage.
-    
+    Random split by frame groups — each unique (game_id, frame_number) and all
+    its augmented variants stay together to prevent data leakage.
+
     Args:
-        df: DataFrame with 'game_id' column
-        val_ratio: Fraction of games to use for validation
-        
+        df: DataFrame with 'game_id' and 'image_path' columns
+        val_ratio: Fraction of frame groups to use for validation
+
     Returns:
         train_df, val_df
     """
-    games = df['game_id'].unique()
-    n_val_games = max(1, int(len(games) * val_ratio))
-    
-    # Use last games for validation (more recent/different conditions)
-    val_games = set(sorted(games)[-n_val_games:])
-    
-    train_df = df[~df['game_id'].isin(val_games)].copy()
-    val_df = df[df['game_id'].isin(val_games)].copy()
-    
-    print(f"Train: {len(train_df)} samples from games {sorted(set(games) - val_games)}")
-    print(f"Val:   {len(val_df)} samples from games {sorted(val_games)}")
-    
+    import re
+
+    # Extract frame number from image path
+    def extract_frame_num(path):
+        match = re.search(r'frame_(\d+)', str(path))
+        return int(match.group(1)) if match else 0
+
+    df = df.copy()
+    df['_frame_num'] = df['image_path'].apply(extract_frame_num)
+
+    # Create unique frame groups: (game_id, frame_number)
+    # Augmented folders (game2_bright etc.) already map to game_id=2,
+    # so all variants of the same frame share the same group key
+    groups = df.groupby(['game_id', '_frame_num']).ngroups
+    group_keys = list(df.groupby(['game_id', '_frame_num']).groups.keys())
+
+    # Shuffle and split
+    rng = np.random.RandomState(42)
+    rng.shuffle(group_keys)
+    n_val = max(1, int(len(group_keys) * val_ratio))
+    val_keys = set(group_keys[:n_val])
+
+    # Assign each row to train or val based on its group
+    df['_group_key'] = list(zip(df['game_id'], df['_frame_num']))
+    val_mask = df['_group_key'].isin(val_keys)
+
+    train_df = df[~val_mask].drop(columns=['_frame_num', '_group_key']).reset_index(drop=True)
+    val_df = df[val_mask].drop(columns=['_frame_num', '_group_key']).reset_index(drop=True)
+
+    train_games = sorted(train_df['game_id'].unique())
+    val_games = sorted(val_df['game_id'].unique())
+    print(f"Frame groups: {len(group_keys)} total, {n_val} for val ({val_ratio:.0%})")
+    print(f"Train: {len(train_df)} samples from games {train_games}")
+    print(f"Val:   {len(val_df)} samples from games {val_games}")
+
     return train_df, val_df
 
 
@@ -172,7 +196,7 @@ def main():
                        help="Number of training epochs")
     parser.add_argument("--batch_size", type=int, default=4,
                        help="Batch size (boards per batch)")
-    parser.add_argument("--lr", type=float, default=1e-4,
+    parser.add_argument("--lr", type=float, default=5e-5,
                        help="Learning rate")
     parser.add_argument("--backbone", type=str, default="resnet18",
                        choices=["resnet18", "resnet34", "resnet50", "efficientnet_b2"],
@@ -218,9 +242,9 @@ def main():
         print("ERROR: No data loaded. Check your data_root path.")
         return
     
-    # Split by game
-    print("\nSplitting by game...")
-    train_df, val_df = split_by_game(df, val_ratio=0.2)
+    # Split by frame groups (random 80/20, augmented variants stay together)
+    print("\nSplitting by frame groups...")
+    train_df, val_df = split_by_frame_group(df, val_ratio=0.2)
     
     # Create data loaders
     print("\nCreating data loaders...")
@@ -239,7 +263,9 @@ def main():
     model = create_model(
         backbone=args.backbone,
         pretrained=True,
-        freeze_backbone=False
+        freeze_backbone=False,
+        dropout=0.4,
+        freeze_ratio=0.6
     )
 
     # Compute class weights
