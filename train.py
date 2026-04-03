@@ -28,7 +28,7 @@ import torch
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
 from data.dataset import ChessboardDataset, get_default_transforms, create_dataloaders, compute_class_weights
-from data.data_loader import apply_occlusion_to_fen
+from data.data_loader import apply_occlusion_to_fen, fen_to_labels
 from models.classifier import create_model
 from training.trainer import Trainer, get_device
 from inference.predictor import find_optimal_threshold
@@ -109,6 +109,29 @@ def load_all_games(data_root: str, game_numbers: list = None) -> pd.DataFrame:
             })
     
     result_df = pd.DataFrame(all_data)
+
+    # --- Data validation ---
+    if len(result_df) > 0:
+        skipped = 0
+        valid_rows = []
+        for idx, row in result_df.iterrows():
+            try:
+                fen_to_labels(row['fen'], flatten=True)
+                valid_rows.append(idx)
+            except (ValueError, KeyError) as e:
+                print(f"  WARNING: Invalid FEN at {row['image_path']}: {e}")
+                skipped += 1
+        if skipped > 0:
+            result_df = result_df.loc[valid_rows].reset_index(drop=True)
+            print(f"  Dropped {skipped} samples with invalid FENs")
+
+        # Remove duplicates (same image appearing multiple times)
+        before = len(result_df)
+        result_df = result_df.drop_duplicates(subset=['image_path']).reset_index(drop=True)
+        dupes = before - len(result_df)
+        if dupes > 0:
+            print(f"  Removed {dupes} duplicate image entries")
+
     print(f"Loaded {len(result_df)} samples from {result_df['game_id'].nunique()} games")
     return result_df
 

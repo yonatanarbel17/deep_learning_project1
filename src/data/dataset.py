@@ -17,7 +17,7 @@ import pandas as pd
 from PIL import Image
 
 import torch  # type: ignore
-from torch.utils.data import Dataset, DataLoader  # type: ignore
+from torch.utils.data import Dataset, DataLoader, WeightedRandomSampler  # type: ignore
 
 from .data_loader import fen_to_labels
 from .board_detection import get_chess_board_upper_look
@@ -68,18 +68,18 @@ def extract_squares_with_padding(
     board: Image.Image,
     board_size: int,
     square_size: int,
-    pad_ratio: float = 0.5
+    pad_ratio: float = 0.7
 ) -> List[Image.Image]:
     """
     Cuts 8x8 squares from board (assumed already board_size x board_size).
-    Each square includes padding from neighbors to capture pieces that 
+    Each square includes padding from neighbors to capture pieces that
     visually "lean" into adjacent squares due to camera angle.
-    
+
     Args:
         board: Input board image (already resized to board_size x board_size)
         board_size: Expected board dimensions
         square_size: Output size for each extracted square
-        pad_ratio: How much of adjacent squares to include (0.5 = half of each neighbor)
+        pad_ratio: How much of adjacent squares to include (0.7 = 70% overlap with neighbors)
     """
     edges = np.round(np.linspace(0, board_size, 9)).astype(int)  # 0..board_size
     squares: List[Image.Image] = []
@@ -144,7 +144,7 @@ class ChessboardDataset(Dataset):
         transform: Optional[Callable] = None,
         board_size: int = 512,
         square_size: int = 224,
-        pad_ratio: float = 0.5,
+        pad_ratio: float = 0.7,
         rotation_augment: bool = True,
         use_perspective_transform: bool = True
     ):
@@ -227,13 +227,14 @@ def get_default_transforms(is_training: bool = True) -> Callable:
 
     if is_training:
         return transforms.Compose([
-            transforms.ColorJitter(brightness=0.25, contrast=0.25, saturation=0.15),
-            transforms.RandomAffine(degrees=3, translate=(0.03, 0.03)),
+            transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.2, hue=0.05),
+            transforms.RandomAffine(degrees=5, translate=(0.03, 0.03)),
+            transforms.RandomGrayscale(p=0.1),
             transforms.RandomApply([transforms.GaussianBlur(kernel_size=3, sigma=(0.1, 1.0))], p=0.2),
             transforms.ToTensor(),
             transforms.Normalize(mean=[0.485, 0.456, 0.406],
                                  std=[0.229, 0.224, 0.225]),
-            # occlusion-like augmentation (optional but useful):
+            # occlusion-like augmentation:
             transforms.RandomErasing(p=0.25, scale=(0.02, 0.15), ratio=(0.3, 3.3), value=0)
         ])
     else:
@@ -244,6 +245,44 @@ def get_default_transforms(is_training: bool = True) -> Callable:
         ])
 
 
+def compute_sample_weights(df: pd.DataFrame, num_classes: int = 14) -> torch.DoubleTensor:
+    """
+    Compute per-sample weights for WeightedRandomSampler.
+    Each board's weight is based on the rarity of the pieces it contains,
+    so boards with rare pieces (kings, occluded squares) are sampled more often.
+
+    Args:
+        df: DataFrame with 'fen' column
+        num_classes: Number of classes
+
+    Returns:
+        torch.DoubleTensor of shape (len(df),) with per-sample weights
+    """
+    # Count total occurrences of each class across all boards
+    class_counts = np.zeros(num_classes)
+    for _, row in df.iterrows():
+        labels = fen_to_labels(row['fen'], flatten=True)
+        for label in labels:
+            class_counts[int(label)] += 1
+
+    # Inverse frequency per class
+    class_weights = np.zeros(num_classes)
+    for c in range(num_classes):
+        if class_counts[c] > 0:
+            class_weights[c] = 1.0 / class_counts[c]
+        else:
+            class_weights[c] = 0.0
+
+    # Per-board weight = mean of its 64 square weights
+    sample_weights = []
+    for _, row in df.iterrows():
+        labels = fen_to_labels(row['fen'], flatten=True)
+        board_weight = np.mean([class_weights[int(l)] for l in labels])
+        sample_weights.append(board_weight)
+
+    return torch.DoubleTensor(sample_weights)
+
+
 def create_dataloaders(
     train_df: pd.DataFrame,
     val_df: pd.DataFrame,
@@ -251,7 +290,8 @@ def create_dataloaders(
     num_workers: int = 4,
     square_size: int = 224,
     board_size: int = 512,
-    use_perspective_transform: bool = True
+    use_perspective_transform: bool = True,
+    use_weighted_sampling: bool = True
 ) -> Tuple[DataLoader, DataLoader]:
     train_transform = get_default_transforms(is_training=True)
     val_transform = get_default_transforms(is_training=False)
@@ -274,10 +314,24 @@ def create_dataloaders(
         use_perspective_transform=use_perspective_transform
     )
 
+    # Weighted sampling: boards with rare pieces are sampled more often
+    sampler = None
+    shuffle = True
+    if use_weighted_sampling and len(train_df) > 0:
+        print("Computing weighted sampler for class balancing...")
+        sample_weights = compute_sample_weights(train_df)
+        sampler = WeightedRandomSampler(
+            weights=sample_weights,
+            num_samples=len(sample_weights),
+            replacement=True
+        )
+        shuffle = False  # sampler and shuffle are mutually exclusive
+
     train_loader = DataLoader(
         train_dataset,
         batch_size=batch_size,
-        shuffle=True,
+        shuffle=shuffle,
+        sampler=sampler,
         num_workers=num_workers,
         pin_memory=True
     )
