@@ -227,7 +227,9 @@ def get_default_transforms(is_training: bool = True) -> Callable:
 
     if is_training:
         return transforms.Compose([
-            transforms.ColorJitter(brightness=0.3, contrast=0.3, saturation=0.2, hue=0.05),
+            # Light color jitter — offline augmentations (bright/dark/color/noisy)
+            # already cover heavy brightness/contrast, so keep this minimal
+            transforms.ColorJitter(brightness=0.1, contrast=0.1),
             transforms.RandomAffine(degrees=5, translate=(0.03, 0.03)),
             transforms.RandomGrayscale(p=0.1),
             transforms.RandomApply([transforms.GaussianBlur(kernel_size=3, sigma=(0.1, 1.0))], p=0.2),

@@ -192,7 +192,7 @@ def main():
                        help="Root directory containing game folders")
     parser.add_argument("--output_dir", type=str, default="outputs",
                        help="Directory to save outputs")
-    parser.add_argument("--epochs", type=int, default=15,
+    parser.add_argument("--epochs", type=int, default=25,
                        help="Number of training epochs")
     parser.add_argument("--batch_size", type=int, default=4,
                        help="Batch size (boards per batch)")
@@ -305,6 +305,57 @@ def main():
     )
     print(report)
     
+    # Per-class accuracy analysis
+    print("\nPer-class accuracy analysis...")
+    CLASS_NAMES = ['P', 'N', 'B', 'R', 'Q', 'K', 'p', 'n', 'b', 'r', 'q', 'k', 'empty', 'occluded']
+    model.load_state_dict(torch.load(os.path.join(args.output_dir, "best_model.pth")))
+    model.to(device)
+    model.eval()
+
+    all_preds = []
+    all_labels = []
+    with torch.no_grad():
+        for squares, labels in val_loader:
+            squares = squares.to(device)
+            logits = model(squares)
+            preds = logits.view(-1, logits.shape[-1]).argmax(dim=1)
+            all_preds.append(preds.cpu())
+            all_labels.append(labels.view(-1).cpu())
+
+    all_preds = torch.cat(all_preds).numpy()
+    all_labels = torch.cat(all_labels).numpy()
+
+    # Per-class stats
+    print(f"\n{'Class':<12} {'Correct':>8} {'Total':>8} {'Accuracy':>10}")
+    print("-" * 42)
+    per_class_results = []
+    for c in range(14):
+        mask = all_labels == c
+        total_c = mask.sum()
+        if total_c > 0:
+            correct_c = (all_preds[mask] == c).sum()
+            acc_c = correct_c / total_c
+            print(f"{CLASS_NAMES[c]:<12} {correct_c:>8} {total_c:>8} {acc_c:>10.4f}")
+            per_class_results.append({"class": CLASS_NAMES[c], "correct": int(correct_c), "total": int(total_c), "accuracy": float(acc_c)})
+        else:
+            print(f"{CLASS_NAMES[c]:<12} {'—':>8} {0:>8} {'N/A':>10}")
+            per_class_results.append({"class": CLASS_NAMES[c], "correct": 0, "total": 0, "accuracy": 0.0})
+
+    # Confusion matrix (save as CSV)
+    from collections import Counter
+    confusion = np.zeros((14, 14), dtype=int)
+    for pred, label in zip(all_preds, all_labels):
+        confusion[label][pred] += 1
+
+    confusion_df = pd.DataFrame(confusion, index=CLASS_NAMES, columns=CLASS_NAMES)
+    confusion_df.to_csv(os.path.join(args.output_dir, "confusion_matrix.csv"))
+    print(f"\nConfusion matrix saved to: {args.output_dir}/confusion_matrix.csv")
+
+    # Save per-class results
+    per_class_df = pd.DataFrame(per_class_results)
+    per_class_df.to_csv(os.path.join(args.output_dir, "per_class_accuracy.csv"), index=False)
+    print(f"Per-class accuracy saved to: {args.output_dir}/per_class_accuracy.csv")
+
     # Find optimal threshold
     print("\nOptimizing OOD threshold...")
     model.load_state_dict(torch.load(os.path.join(args.output_dir, "best_model.pth")))
