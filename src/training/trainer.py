@@ -13,6 +13,7 @@ import torch.optim as optim
 from torch.utils.data import DataLoader
 import pandas as pd
 import numpy as np
+from tqdm import tqdm
 
 
 class Trainer:
@@ -63,8 +64,7 @@ class Trainer:
             self.optimizer,
             mode='max',
             patience=lr_scheduler_patience,
-            factor=0.5,
-            verbose=True
+            factor=0.5
         )
 
         self.history: List[Dict] = []
@@ -78,30 +78,32 @@ class Trainer:
         correct = 0
         total = 0
         
-        for squares, labels in self.train_loader:
+        pbar = tqdm(self.train_loader, desc="Train", leave=False)
+        for squares, labels in pbar:
             # squares: (B, 64, 3, H, W), labels: (B, 64)
             squares = squares.to(self.device)
             labels = labels.to(self.device)
-            
+
             # Reshape for loss computation
             B = squares.shape[0]
             logits = self.model(squares)  # (B, 64, num_classes)
-            
+
             # Flatten for CrossEntropyLoss: (B*64, 13) vs (B*64,)
             logits_flat = logits.view(-1, logits.shape[-1])
             labels_flat = labels.view(-1)
-            
+
             loss = self.criterion(logits_flat, labels_flat)
-            
+
             self.optimizer.zero_grad()
             loss.backward()
             torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1.0)
             self.optimizer.step()
-            
+
             total_loss += loss.item() * B
             preds = logits_flat.argmax(dim=1)
             correct += (preds == labels_flat).sum().item()
             total += labels_flat.numel()
+            pbar.set_postfix(loss=f"{loss.item():.4f}", acc=f"{correct/total:.4f}")
         
         avg_loss = total_loss / len(self.train_loader.dataset)
         accuracy = correct / total

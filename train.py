@@ -152,7 +152,7 @@ def main():
     parser.add_argument("--lr", type=float, default=1e-4,
                        help="Learning rate")
     parser.add_argument("--backbone", type=str, default="resnet18",
-                       choices=["resnet18", "resnet34", "resnet50"],
+                       choices=["resnet18", "resnet34", "resnet50", "efficientnet_b2"],
                        help="Model backbone")
     parser.add_argument("--board_size", type=int, default=512,
                        help="Size to resize board images")

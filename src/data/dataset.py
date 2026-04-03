@@ -210,7 +210,7 @@ class ChessboardDataset(Dataset):
         squares_tensor = torch.stack(sq_tensors, dim=0)
 
         # 7) Labels -> (64,)
-        labels_tensor = torch.tensor(labels_8x8.reshape(-1), dtype=torch.long)
+        labels_tensor = torch.tensor(labels_8x8.reshape(-1).copy(), dtype=torch.long)
 
         return squares_tensor, labels_tensor
 

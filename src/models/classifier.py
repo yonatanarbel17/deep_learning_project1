@@ -1,5 +1,5 @@
 """
-Chess square classifier using pretrained ResNet.
+Chess square classifier using pretrained ResNet or EfficientNet.
 Takes 64 squares from a board and classifies each into piece classes.
 """
 
@@ -15,11 +15,11 @@ class ChessSquareClassifier(nn.Module):
     6-11: Black pieces (p, n, b, r, q, k)
     12: Empty
     13: Occluded
-    
+
     Input: (B, 64, 3, H, W) - B boards, each with 64 squares
     Output: (B, 64, 14) - logits for each square
     """
-    
+
     def __init__(
         self,
         num_classes: int = 14,
@@ -31,33 +31,52 @@ class ChessSquareClassifier(nn.Module):
         super().__init__()
         self.num_classes = num_classes
         self.backbone_name = backbone
-        
+
         # Load pretrained backbone
         if backbone == "resnet18":
             weights = models.ResNet18_Weights.DEFAULT if pretrained else None
             self.backbone = models.resnet18(weights=weights)
             feature_dim = 512
+            self.backbone.fc = nn.Sequential(
+                nn.Dropout(p=dropout),
+                nn.Linear(feature_dim, num_classes)
+            )
+            self._classifier_attr = "fc"
         elif backbone == "resnet34":
             weights = models.ResNet34_Weights.DEFAULT if pretrained else None
             self.backbone = models.resnet34(weights=weights)
             feature_dim = 512
+            self.backbone.fc = nn.Sequential(
+                nn.Dropout(p=dropout),
+                nn.Linear(feature_dim, num_classes)
+            )
+            self._classifier_attr = "fc"
         elif backbone == "resnet50":
             weights = models.ResNet50_Weights.DEFAULT if pretrained else None
             self.backbone = models.resnet50(weights=weights)
             feature_dim = 2048
+            self.backbone.fc = nn.Sequential(
+                nn.Dropout(p=dropout),
+                nn.Linear(feature_dim, num_classes)
+            )
+            self._classifier_attr = "fc"
+        elif backbone == "efficientnet_b2":
+            weights = models.EfficientNet_B2_Weights.DEFAULT if pretrained else None
+            self.backbone = models.efficientnet_b2(weights=weights)
+            feature_dim = 1408
+            self.backbone.classifier = nn.Sequential(
+                nn.Dropout(p=dropout),
+                nn.Linear(feature_dim, num_classes)
+            )
+            self._classifier_attr = "classifier"
         else:
             raise ValueError(f"Unknown backbone: {backbone}")
-        
-        # Replace final FC with dropout + linear for regularization
-        self.backbone.fc = nn.Sequential(
-            nn.Dropout(p=dropout),
-            nn.Linear(feature_dim, num_classes)
-        )
-        
+
         # Optionally freeze backbone (only train final layer)
         if freeze_backbone:
+            classifier_attr = self._classifier_attr
             for name, param in self.backbone.named_parameters():
-                if "fc" not in name:
+                if classifier_attr not in name:
                     param.requires_grad = False
     
     def forward(self, x: torch.Tensor) -> torch.Tensor:
