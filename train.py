@@ -31,7 +31,7 @@ from data.dataset import ChessboardDataset, get_default_transforms, create_datal
 from data.data_loader import apply_occlusion_to_fen, fen_to_labels
 from models.classifier import create_model
 from training.trainer import Trainer, get_device
-from inference.predictor import find_optimal_threshold
+from inference.predictor import find_optimal_threshold, BoardPredictor
 from utils.visualization import plot_training_curves, create_training_report
 
 
@@ -285,10 +285,17 @@ def main():
         val_loader=val_loader,
         device=device
     )
-    
-    # Save threshold
+
+    # Calibrate temperature scaling
+    print("\nCalibrating confidence temperature...")
+    predictor = BoardPredictor(model=model, device=device, threshold=best_threshold)
+    predictor.calibrate_temperature(val_loader)
+    calibrated_temp = predictor.temperature
+
+    # Save threshold and temperature
     with open(os.path.join(args.output_dir, "optimal_threshold.txt"), "w") as f:
         f.write(f"optimal_threshold={best_threshold}\n")
+        f.write(f"calibrated_temperature={calibrated_temp:.4f}\n")
         for t, res in threshold_results.items():
             f.write(f"threshold={t}: acc={res['accuracy']:.4f}, coverage={res['coverage']:.4f}\n")
     
@@ -300,6 +307,7 @@ def main():
     print(f"Training curves:     {args.output_dir}/training_curves.png")
     print(f"Training report:     {args.output_dir}/training_report.txt")
     print(f"Optimal threshold:   {best_threshold}")
+    print(f"Calibrated temp:     {calibrated_temp:.4f}")
     print(f"{'='*60}\n")
 
 

@@ -23,6 +23,78 @@ from data.data_loader import grid_to_fen, ID_TO_PIECE, NUM_CLASSES
 
 OCCLUDED_CLASS_ID = 13
 
+# Chess piece count constraints (max legal counts per side)
+# ID mapping: 0=P, 1=N, 2=B, 3=R, 4=Q, 5=K, 6=p, 7=n, 8=b, 9=r, 10=q, 11=k
+MAX_PIECE_COUNTS = {
+    0: 8, 1: 10, 2: 10, 3: 10, 4: 9, 5: 1,   # White
+    6: 8, 7: 10, 8: 10, 9: 10, 10: 9, 11: 1,  # Black
+}
+
+
+def apply_chess_constraints(grid: np.ndarray, probs_grid: np.ndarray) -> np.ndarray:
+    """
+    Apply chess rule constraints to post-process predictions.
+
+    Enforces:
+    1. No pawns on ranks 1 or 8
+    2. Exactly one king per side (fix using second-best prediction if extra)
+    3. Piece counts within legal limits
+
+    Args:
+        grid: 8x8 numpy array of predicted class IDs (int or 'unknown')
+        probs_grid: (8, 8, num_classes) probability array for fallback corrections
+
+    Returns:
+        Corrected 8x8 grid
+    """
+    grid = grid.copy()
+
+    # --- Rule 1: No pawns on ranks 1 or 8 (rows 0 and 7 in grid) ---
+    for col in range(8):
+        for row in [0, 7]:
+            cell = grid[row, col]
+            if isinstance(cell, (int, np.integer)) and cell in (0, 6):  # White pawn=0, Black pawn=6
+                # Replace with second-best non-pawn prediction
+                probs = probs_grid[row, col].copy()
+                probs[0] = 0   # zero out white pawn
+                probs[6] = 0   # zero out black pawn
+                grid[row, col] = int(np.argmax(probs))
+
+    # --- Rule 2: Exactly one king per side ---
+    for king_id in [5, 11]:  # White king=5, Black king=11
+        positions = []
+        for r in range(8):
+            for c in range(8):
+                if isinstance(grid[r, c], (int, np.integer)) and int(grid[r, c]) == king_id:
+                    positions.append((r, c))
+
+        if len(positions) > 1:
+            # Keep the king with highest confidence, fix the rest
+            best_pos = max(positions, key=lambda p: probs_grid[p[0], p[1], king_id])
+            for r, c in positions:
+                if (r, c) != best_pos:
+                    probs = probs_grid[r, c].copy()
+                    probs[king_id] = 0  # zero out king class
+                    grid[r, c] = int(np.argmax(probs))
+
+    # --- Rule 3: Piece count limits ---
+    for piece_id, max_count in MAX_PIECE_COUNTS.items():
+        positions = []
+        for r in range(8):
+            for c in range(8):
+                if isinstance(grid[r, c], (int, np.integer)) and int(grid[r, c]) == piece_id:
+                    positions.append((r, c, probs_grid[r, c, piece_id]))
+
+        if len(positions) > max_count:
+            # Sort by confidence (ascending), fix least confident extras
+            positions.sort(key=lambda x: x[2])
+            for r, c, _ in positions[:len(positions) - max_count]:
+                probs = probs_grid[r, c].copy()
+                probs[piece_id] = 0
+                grid[r, c] = int(np.argmax(probs))
+
+    return grid
+
 
 class BoardPredictor:
     """
@@ -37,12 +109,48 @@ class BoardPredictor:
         self,
         model: nn.Module,
         device: torch.device,
-        threshold: float = 0.5
+        threshold: float = 0.5,
+        temperature: float = 1.0
     ):
         self.model = model.to(device)
         self.model.eval()
         self.device = device
         self.threshold = threshold
+        self.temperature = temperature
+
+    def calibrate_temperature(self, val_loader: DataLoader, lr: float = 0.01, max_iter: int = 50):
+        """
+        Learn optimal temperature for confidence calibration using validation set.
+        Minimizes NLL on validation data to produce well-calibrated probabilities.
+        """
+        self.model.eval()
+        temperature = nn.Parameter(torch.ones(1, device=self.device) * 1.5)
+        optimizer = torch.optim.LBFGS([temperature], lr=lr, max_iter=max_iter)
+        nll_criterion = nn.CrossEntropyLoss()
+
+        # Collect all logits and labels
+        all_logits = []
+        all_labels = []
+        with torch.no_grad():
+            for squares, labels in val_loader:
+                squares = squares.to(self.device)
+                labels = labels.to(self.device)
+                logits = self.model(squares)
+                all_logits.append(logits.view(-1, logits.shape[-1]))
+                all_labels.append(labels.view(-1))
+
+        all_logits = torch.cat(all_logits, dim=0)
+        all_labels = torch.cat(all_labels, dim=0)
+
+        def eval_fn():
+            optimizer.zero_grad()
+            loss = nll_criterion(all_logits / temperature, all_labels)
+            loss.backward()
+            return loss
+
+        optimizer.step(eval_fn)
+        self.temperature = temperature.item()
+        print(f"Calibrated temperature: {self.temperature:.4f}")
     
     @staticmethod
     def _apply_hybrid_filter(predictions: np.ndarray, confidences: np.ndarray, threshold: float) -> np.ndarray:
@@ -58,15 +166,17 @@ class BoardPredictor:
     def predict_board(
         self,
         squares_tensor: torch.Tensor,
-        return_confidences: bool = False
+        return_confidences: bool = False,
+        apply_constraints: bool = True
     ) -> Tuple[np.ndarray, str, Optional[np.ndarray]]:
         """
         Predict board state from 64 square images.
-        
+
         Args:
             squares_tensor: (64, 3, H, W) tensor of square images
             return_confidences: Whether to return confidence scores
-            
+            apply_constraints: Whether to apply chess rule post-processing
+
         Returns:
             grid: 8x8 numpy array with class IDs (0-12) or 'unknown'
             fen: FEN string (treats 'unknown' as empty)
@@ -74,22 +184,34 @@ class BoardPredictor:
         """
         if squares_tensor.dim() == 4:
             squares_tensor = squares_tensor.unsqueeze(0)
-        
+
         squares_tensor = squares_tensor.to(self.device)
-        
+
         logits = self.model(squares_tensor)
+
+        # Apply temperature scaling if available
+        if self.temperature != 1.0:
+            logits = logits / self.temperature
+
         probs = F.softmax(logits, dim=-1)
         confidences, predictions = torch.max(probs, dim=-1)
-        
+
         confidences = confidences.squeeze(0).cpu().numpy()
         predictions = predictions.squeeze(0).cpu().numpy()
-        
+        probs_np = probs.squeeze(0).cpu().numpy()  # (64, num_classes)
+
         predictions = self._apply_hybrid_filter(predictions, confidences, self.threshold)
-        
+
         grid = predictions.reshape(8, 8)
         confidences_grid = confidences.reshape(8, 8)
+        probs_grid = probs_np.reshape(8, 8, -1)
+
+        # Apply chess rule constraints
+        if apply_constraints:
+            grid = apply_chess_constraints(grid, probs_grid)
+
         fen = grid_to_fen(grid)
-        
+
         if return_confidences:
             return grid, fen, confidences_grid
         return grid, fen, None

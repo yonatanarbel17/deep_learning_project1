@@ -37,7 +37,8 @@ class Trainer:
         weight_decay: float = 1e-3,
         patience: int = 5,
         lr_scheduler_patience: int = 3,
-        class_weights: torch.Tensor = None
+        class_weights: torch.Tensor = None,
+        label_smoothing: float = 0.1
     ):
         self.model = model.to(device)
         self.train_loader = train_loader
@@ -50,9 +51,11 @@ class Trainer:
         os.makedirs(output_dir, exist_ok=True)
 
         if class_weights is not None:
-            self.criterion = nn.CrossEntropyLoss(weight=class_weights)
+            self.criterion = nn.CrossEntropyLoss(
+                weight=class_weights, label_smoothing=label_smoothing
+            )
         else:
-            self.criterion = nn.CrossEntropyLoss()
+            self.criterion = nn.CrossEntropyLoss(label_smoothing=label_smoothing)
 
         self.optimizer = optim.AdamW(
             model.parameters(),
