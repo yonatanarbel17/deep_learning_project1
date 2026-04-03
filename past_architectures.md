@@ -29,7 +29,7 @@
 - **Split:** Game-level (last 20% of game IDs → val)
 - **Train:** 2780 samples from 8 games
 - **Val:** 200 samples from 2 games (games 11, 12 only)
-- **Augmentations (offline):** bright/color/dark/noisy variants for games 2,4,5,6,7
+- **Augmentations (offline):** bright/color/dark/noisy variants for all games (2,4-12)
 - **Augmentations (online):** ColorJitter(0.3/0.3/0.2/0.05), ±5° rotation, RandomGrayscale(0.1), GaussianBlur(0.2), RandomErasing(0.25)
 
 ### Results (killed at epoch 8)
@@ -84,7 +84,7 @@
   - Augmented variants stay with their original (no leakage)
 - **Train:** 2385 samples from 10 games
 - **Val:** 595 samples from 9 games
-- **Augmentations (offline):** bright/color/dark/noisy variants for games 2,4,5,6,7
+- **Augmentations (offline):** bright/color/dark/noisy variants for all games (2,4-12)
 - **Augmentations (online):** ColorJitter(0.3/0.3/0.2/0.05), ±5° rotation, RandomGrayscale(0.1), GaussianBlur(0.2), RandomErasing(0.25)
 
 ### Results (full 15 epochs)
