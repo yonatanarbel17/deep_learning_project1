@@ -283,7 +283,9 @@ def main():
         device=device,
         output_dir=args.output_dir,
         learning_rate=args.lr,
-        class_weights=class_weights
+        class_weights=class_weights,
+        unfreeze_epoch=4,
+        unfreeze_lr_factor=0.5
     )
 
     history = trainer.train(num_epochs=args.epochs)

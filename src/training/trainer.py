@@ -38,7 +38,9 @@ class Trainer:
         patience: int = 5,
         lr_scheduler_patience: int = 3,
         class_weights: torch.Tensor = None,
-        label_smoothing: float = 0.1
+        label_smoothing: float = 0.1,
+        unfreeze_epoch: int = 0,
+        unfreeze_lr_factor: float = 0.5
     ):
         self.model = model.to(device)
         self.train_loader = train_loader
@@ -47,6 +49,9 @@ class Trainer:
         self.output_dir = output_dir
         self.patience = patience
         self.lr_scheduler_patience = lr_scheduler_patience
+        self.unfreeze_epoch = unfreeze_epoch
+        self.unfreeze_lr_factor = unfreeze_lr_factor
+        self.unfrozen = False
 
         os.makedirs(output_dir, exist_ok=True)
 
@@ -157,6 +162,26 @@ class Trainer:
 
         for epoch in range(1, num_epochs + 1):
             epoch_start = time.time()
+
+            # Gradual unfreezing: unfreeze all layers at the specified epoch
+            if self.unfreeze_epoch > 0 and epoch == self.unfreeze_epoch and not self.unfrozen:
+                for param in self.model.parameters():
+                    param.requires_grad = True
+                # Rebuild optimizer with all params and reduced LR
+                current_lr = self.optimizer.param_groups[0]['lr']
+                new_lr = current_lr * self.unfreeze_lr_factor
+                self.optimizer = optim.AdamW(
+                    self.model.parameters(),
+                    lr=new_lr,
+                    weight_decay=self.optimizer.param_groups[0]['weight_decay']
+                )
+                self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+                    self.optimizer, mode='max',
+                    patience=self.lr_scheduler_patience, factor=0.5
+                )
+                self.unfrozen = True
+                n_trainable = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
+                print(f"  >>> Unfroze all layers at epoch {epoch} | New LR: {new_lr:.2e} | Trainable params: {n_trainable:,}")
 
             # Train
             train_loss, train_acc = self.train_epoch()
