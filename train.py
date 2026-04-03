@@ -264,7 +264,7 @@ def main():
         backbone=args.backbone,
         pretrained=True,
         freeze_backbone=False,
-        dropout=0.4,
+        dropout=0.3,
         freeze_ratio=0.6
     )
 
