@@ -217,6 +217,80 @@ class BoardPredictor:
         return grid, fen, None
     
     @torch.no_grad()
+    def predict_board_tta(
+        self,
+        squares_tensor: torch.Tensor,
+        apply_constraints: bool = True,
+        num_augments: int = 5
+    ) -> Tuple[np.ndarray, str, Optional[np.ndarray]]:
+        """
+        Test-Time Augmentation: run multiple slightly augmented versions of each
+        square through the model and average the probabilities before taking argmax.
+
+        Augmentations: original + horizontal flip + small rotations (±3°, ±5°).
+        No retraining needed — just smarter inference.
+
+        Args:
+            squares_tensor: (64, 3, H, W) tensor of square images
+            apply_constraints: Whether to apply chess rule post-processing
+            num_augments: Number of augmented versions (default 5)
+
+        Returns:
+            grid, fen, confidences (same as predict_board)
+        """
+        import torchvision.transforms.functional as TF
+
+        if squares_tensor.dim() == 4:
+            squares_tensor = squares_tensor.unsqueeze(0)
+
+        squares_tensor = squares_tensor.to(self.device)
+        # squares_tensor: (1, 64, 3, H, W)
+        sq = squares_tensor.squeeze(0)  # (64, 3, H, W)
+
+        # Build augmented versions
+        augmented = [sq]  # original
+
+        # Horizontal flip
+        augmented.append(torch.flip(sq, dims=[-1]))
+
+        # Small rotations
+        for angle in [3.0, -3.0, 5.0]:
+            rotated = torch.stack([TF.rotate(sq[i], angle) for i in range(64)])
+            augmented.append(rotated)
+            if len(augmented) >= num_augments:
+                break
+
+        # Run all through the model, average probabilities
+        all_probs = []
+        for aug_sq in augmented:
+            aug_batch = aug_sq.unsqueeze(0)  # (1, 64, 3, H, W)
+            logits = self.model(aug_batch)
+            if self.temperature != 1.0:
+                logits = logits / self.temperature
+            probs = F.softmax(logits, dim=-1)
+            all_probs.append(probs.squeeze(0))  # (64, num_classes)
+
+        # Average probabilities across augmentations
+        avg_probs = torch.stack(all_probs, dim=0).mean(dim=0)  # (64, num_classes)
+
+        confidences, predictions = torch.max(avg_probs, dim=-1)
+        confidences = confidences.cpu().numpy()
+        predictions = predictions.cpu().numpy()
+        probs_np = avg_probs.cpu().numpy()
+
+        predictions = self._apply_hybrid_filter(predictions, confidences, self.threshold)
+
+        grid = predictions.reshape(8, 8)
+        confidences_grid = confidences.reshape(8, 8)
+        probs_grid = probs_np.reshape(8, 8, -1)
+
+        if apply_constraints:
+            grid = apply_chess_constraints(grid, probs_grid)
+
+        fen = grid_to_fen(grid)
+        return grid, fen, confidences_grid
+
+    @torch.no_grad()
     def predict_batch(
         self,
         squares_batch: torch.Tensor

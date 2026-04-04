@@ -192,7 +192,7 @@ def main():
                        help="Root directory containing game folders")
     parser.add_argument("--output_dir", type=str, default="outputs",
                        help="Directory to save outputs")
-    parser.add_argument("--epochs", type=int, default=25,
+    parser.add_argument("--epochs", type=int, default=35,
                        help="Number of training epochs")
     parser.add_argument("--batch_size", type=int, default=4,
                        help="Batch size (boards per batch)")
@@ -285,7 +285,9 @@ def main():
         learning_rate=args.lr,
         class_weights=class_weights,
         unfreeze_epoch=4,
-        unfreeze_lr_factor=0.5
+        unfreeze_lr_factor=0.5,
+        num_epochs=args.epochs,
+        use_cosine_annealing=True
     )
 
     history = trainer.train(num_epochs=args.epochs)
@@ -371,10 +373,39 @@ def main():
     predictor.calibrate_temperature(val_loader)
     calibrated_temp = predictor.temperature
 
+    # TTA evaluation on validation set
+    print("\nEvaluating with Test-Time Augmentation (TTA)...")
+    predictor.temperature = calibrated_temp
+    tta_correct = 0
+    tta_total = 0
+    with torch.no_grad():
+        for squares, labels in val_loader:
+            squares = squares.to(device)
+            labels_np = labels.numpy()
+            B = squares.shape[0]
+            for i in range(B):
+                grid, fen, _ = predictor.predict_board_tta(
+                    squares[i], apply_constraints=True, num_augments=5
+                )
+                # Compare grid predictions to labels
+                label_grid = labels_np[i].reshape(8, 8)
+                for r in range(8):
+                    for c in range(8):
+                        pred = grid[r, c]
+                        if isinstance(pred, (int, np.integer)):
+                            tta_total += 1
+                            if int(pred) == label_grid[r, c]:
+                                tta_correct += 1
+                        else:
+                            tta_total += 1  # 'unknown' counted as incorrect
+    tta_acc = tta_correct / tta_total if tta_total > 0 else 0.0
+    print(f"TTA Validation Accuracy: {tta_acc:.4f} ({tta_correct}/{tta_total})")
+
     # Save threshold and temperature
     with open(os.path.join(args.output_dir, "optimal_threshold.txt"), "w") as f:
         f.write(f"optimal_threshold={best_threshold}\n")
         f.write(f"calibrated_temperature={calibrated_temp:.4f}\n")
+        f.write(f"tta_val_accuracy={tta_acc:.4f}\n")
         for t, res in threshold_results.items():
             f.write(f"threshold={t}: acc={res['accuracy']:.4f}, coverage={res['coverage']:.4f}\n")
     

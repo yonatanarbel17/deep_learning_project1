@@ -40,7 +40,9 @@ class Trainer:
         class_weights: torch.Tensor = None,
         label_smoothing: float = 0.1,
         unfreeze_epoch: int = 0,
-        unfreeze_lr_factor: float = 0.5
+        unfreeze_lr_factor: float = 0.5,
+        num_epochs: int = 25,
+        use_cosine_annealing: bool = True
     ):
         self.model = model.to(device)
         self.train_loader = train_loader
@@ -52,6 +54,10 @@ class Trainer:
         self.unfreeze_epoch = unfreeze_epoch
         self.unfreeze_lr_factor = unfreeze_lr_factor
         self.unfrozen = False
+        self.learning_rate = learning_rate
+        self.weight_decay = weight_decay
+        self.use_cosine_annealing = use_cosine_annealing
+        self.num_epochs = num_epochs
 
         os.makedirs(output_dir, exist_ok=True)
 
@@ -68,12 +74,21 @@ class Trainer:
             weight_decay=weight_decay
         )
 
-        self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-            self.optimizer,
-            mode='max',
-            patience=lr_scheduler_patience,
-            factor=0.5
-        )
+        if use_cosine_annealing and unfreeze_epoch > 0:
+            # For the frozen phase (epochs 1 to unfreeze_epoch-1), use constant LR
+            # Cosine annealing will be set up after unfreezing
+            self.scheduler = None
+        elif use_cosine_annealing:
+            self.scheduler = optim.lr_scheduler.CosineAnnealingLR(
+                self.optimizer, T_max=num_epochs, eta_min=1e-6
+            )
+        else:
+            self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+                self.optimizer,
+                mode='max',
+                patience=lr_scheduler_patience,
+                factor=0.5
+            )
 
         self.history: List[Dict] = []
         self.best_val_acc = 0.0
@@ -173,15 +188,24 @@ class Trainer:
                 self.optimizer = optim.AdamW(
                     self.model.parameters(),
                     lr=new_lr,
-                    weight_decay=self.optimizer.param_groups[0]['weight_decay']
+                    weight_decay=self.weight_decay
                 )
-                self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
-                    self.optimizer, mode='max',
-                    patience=self.lr_scheduler_patience, factor=0.5
-                )
+                # Set up scheduler for the fine-tuning phase
+                remaining_epochs = num_epochs - epoch + 1
+                if self.use_cosine_annealing:
+                    self.scheduler = optim.lr_scheduler.CosineAnnealingLR(
+                        self.optimizer, T_max=remaining_epochs, eta_min=1e-6
+                    )
+                    sched_name = "CosineAnnealing"
+                else:
+                    self.scheduler = optim.lr_scheduler.ReduceLROnPlateau(
+                        self.optimizer, mode='max',
+                        patience=self.lr_scheduler_patience, factor=0.5
+                    )
+                    sched_name = "ReduceLROnPlateau"
                 self.unfrozen = True
                 n_trainable = sum(p.numel() for p in self.model.parameters() if p.requires_grad)
-                print(f"  >>> Unfroze all layers at epoch {epoch} | New LR: {new_lr:.2e} | Trainable params: {n_trainable:,}")
+                print(f"  >>> Unfroze all layers at epoch {epoch} | New LR: {new_lr:.2e} | Scheduler: {sched_name} ({remaining_epochs} epochs) | Trainable params: {n_trainable:,}")
 
             # Train
             train_loss, train_acc = self.train_epoch()
@@ -189,8 +213,12 @@ class Trainer:
             # Validate
             val_loss, val_acc = self.validate()
 
-            # Step scheduler based on validation accuracy
-            self.scheduler.step(val_acc)
+            # Step scheduler
+            if self.scheduler is not None:
+                if isinstance(self.scheduler, optim.lr_scheduler.ReduceLROnPlateau):
+                    self.scheduler.step(val_acc)
+                else:
+                    self.scheduler.step()
 
             epoch_time = time.time() - epoch_start
 
