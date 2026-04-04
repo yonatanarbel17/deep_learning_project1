@@ -123,3 +123,111 @@
 - **OOD threshold at 0.1:** Essentially means "accept all predictions" — the model is confident enough that filtering by threshold reduces coverage too aggressively
 - **Temperature 1.2559:** Slightly >1 means the model is slightly overconfident; temperature scaling softens predictions
 - **Room for improvement:** Model was still improving at epoch 15 — more epochs or gradual unfreezing could push accuracy higher
+
+---
+
+## Run 3 — EfficientNet-B2 (Gradual Unfreezing, Reduced Augmentation)
+
+**Date:** 2026-04-04
+**Branch:** Chony (commit 16c1d21)
+**Status:** Completed (25 epochs)
+
+### Architecture
+- **Backbone:** EfficientNet-B2 (pretrained ImageNet)
+- **Classifier head:** Dropout(0.3) → Linear(1408, 14)
+- **Frozen layers:** 179/299 backbone parameter groups (60%) for epochs 1-3, then fully unfrozen
+- **Gradual unfreezing:** At epoch 4, all layers unfrozen, LR halved (5e-5 → 2.5e-5)
+- **Input:** 512×512 board → 64 squares with 70% overlap padding → 224×224 per square
+
+### Training Config
+- **LR:** 5e-5 → 2.5e-5 at epoch 4 (AdamW, weight_decay=1e-3)
+- **Batch size:** 4 boards
+- **Label smoothing:** 0.1
+- **Class weights:** Inverse-frequency
+- **WeightedRandomSampler:** Yes (board-level)
+- **Gradient clipping:** max_norm=1.0
+- **LR scheduler:** ReduceLROnPlateau (patience=3, factor=0.5) — never activated
+- **Early stopping:** patience=5 — never activated
+
+### Data
+- **Total samples:** 2980 boards from 10 games
+- **Split:** Random frame-group split (20% of unique game_id+frame groups → val)
+- **Train:** 2385 samples from 10 games
+- **Val:** 595 samples from 9 games
+- **Augmentations (offline):** bright/color/dark/noisy variants for all games (2,4-12)
+- **Augmentations (online):** ColorJitter(0.1/0.1) — reduced to avoid overlap with offline variants, ±5° rotation, RandomGrayscale(0.1), GaussianBlur(0.2), RandomErasing(0.25)
+
+### Results (full 25 epochs)
+| Epoch | Train Acc | Val Acc | Train Loss | Val Loss | LR |
+|-------|-----------|---------|------------|----------|----|
+| 1     | 37.58%    | 70.43%  | 2.5983     | 2.5088   | 5.00e-05 |
+| 2     | 67.75%    | 76.67%  | 2.0410     | 2.2390   | 5.00e-05 |
+| 3     | 74.30%    | 79.57%  | 1.8919     | 2.1606   | 5.00e-05 |
+| 4*    | 78.50%    | 83.05%  | 1.7537     | 2.0633   | 2.50e-05 |
+| 5     | 82.23%    | 86.26%  | 1.6610     | 1.9896   | 2.50e-05 |
+| 6     | 84.62%    | 88.95%  | 1.6256     | 1.9670   | 2.50e-05 |
+| 7     | 85.92%    | 89.75%  | 1.5940     | 1.9378   | 2.50e-05 |
+| 8     | 86.97%    | 90.28%  | 1.5665     | 1.9226   | 2.50e-05 |
+| 9     | 88.05%    | 90.72%  | 1.5484     | 1.9122   | 2.50e-05 |
+| 10    | 88.31%    | 91.28%  | 1.5355     | 1.9133   | 2.50e-05 |
+| 11    | 89.15%    | 92.42%  | 1.5342     | 1.8932   | 2.50e-05 |
+| 12    | 90.62%    | 92.49%  | 1.5015     | 1.8889   | 2.50e-05 |
+| 13    | 90.71%    | 92.58%  | 1.4861     | 1.8888   | 2.50e-05 |
+| 14    | 91.15%    | 93.03%  | 1.4820     | 1.8894   | 2.50e-05 |
+| 15    | 91.61%    | 93.37%  | 1.4928     | 1.8761   | 2.50e-05 |
+| 16    | 91.83%    | 93.95%  | 1.4700     | 1.8732   | 2.50e-05 |
+| 17    | 92.29%    | 94.30%  | 1.4723     | 1.8699   | 2.50e-05 |
+| 18    | 92.66%    | 94.16%  | 1.4607     | 1.8742   | 2.50e-05 |
+| 19    | 92.82%    | 94.39%  | 1.4560     | 1.8649   | 2.50e-05 |
+| 20    | 93.66%    | 94.42%  | 1.4416     | 1.8637   | 2.50e-05 |
+| 21    | 93.81%    | 94.09%  | 1.4618     | 1.8776   | 2.50e-05 |
+| 22    | 93.56%    | 94.43%  | 1.4571     | 1.8728   | 2.50e-05 |
+| 23    | 93.67%    | 94.39%  | 1.4422     | 1.8645   | 2.50e-05 |
+| 24    | 93.88%    | 94.78%  | 1.4347     | 1.8682   | 2.50e-05 |
+| 25    | 94.02%    | 94.97%  | 1.4167     | 1.8582   | 2.50e-05 |
+
+*Epoch 4: all layers unfrozen, LR halved
+
+**Best val accuracy:** 94.97% (epoch 25)
+**Overfit gap:** -0.96% (val higher than train — no overfitting)
+**Optimal OOD threshold:** 0.1 (score=0.9497)
+**Calibrated temperature:** 1.2439
+
+### Per-Class Accuracy
+| Class | Correct | Total | Accuracy |
+|-------|---------|-------|----------|
+| P (white pawn) | 3087 | 3240 | 95.28% |
+| N (white knight) | 625 | 665 | 93.98% |
+| B (white bishop) | 558 | 600 | 93.00% |
+| R (white rook) | 813 | 840 | 96.79% |
+| Q (white queen) | 305 | 335 | 91.04% |
+| K (white king) | 548 | 580 | 94.48% |
+| p (black pawn) | 2878 | 3020 | 95.30% |
+| n (black knight) | 464 | 500 | 92.80% |
+| b (black bishop) | 641 | 665 | 96.39% |
+| r (black rook) | 816 | 830 | 98.31% |
+| q (black queen) | 307 | 335 | 91.64% |
+| k (black king) | 552 | 580 | 95.17% |
+| empty | 24039 | 25280 | 95.09% |
+| occluded | 533 | 610 | 87.38% |
+
+### Analysis
+- **+3.6% over Run 2:** 94.97% vs 91.37% — gradual unfreezing was the key improvement
+- **No overfitting:** Val > train throughout, negative overfit gap (-0.96%)
+- **Val loss monotonically decreasing:** 2.51 → 1.86 across all 25 epochs
+- **Plateauing by epoch 20-25:** Val accuracy gains slowing (94.42% → 94.97% over last 5 epochs)
+- **Per-class weak spots:**
+  - Queens (white 91.0%, black 91.6%) — lowest piece accuracy, likely confused with rooks/bishops
+  - Occluded (87.4%) — hardest class, makes sense as it's visually ambiguous by definition
+  - Knights (white 93.98%, black 92.80%) — unique shape but small on-board, some confusion likely
+- **Per-class strengths:**
+  - Black rook (98.31%) — very distinctive shape
+  - Black bishop (96.39%), White rook (96.79%) — high accuracy
+  - Pawns (95.3% both colors) — abundant data helps
+- **Key improvements over Run 2:**
+  - Gradual unfreezing at epoch 4 let the full network fine-tune with stable head
+  - Reduced online augmentation (ColorJitter 0.1/0.1) removed redundancy with offline variants
+  - 25 epochs instead of 15 let the model continue improving
+  - Lower dropout (0.3 vs 0.4) gave model more capacity
+- **Temperature 1.2439:** Still slightly overconfident but improving (was 1.2559 in Run 2)
+- **Room for improvement:** Occluded class (87.4%) and queens (91%) are the main weak spots
