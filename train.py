@@ -192,7 +192,7 @@ def main():
                        help="Root directory containing game folders")
     parser.add_argument("--output_dir", type=str, default="outputs",
                        help="Directory to save outputs")
-    parser.add_argument("--epochs", type=int, default=25,
+    parser.add_argument("--epochs", type=int, default=50,
                        help="Number of training epochs")
     parser.add_argument("--batch_size", type=int, default=4,
                        help="Batch size (boards per batch)")
@@ -209,6 +209,8 @@ def main():
                        help="DataLoader workers (0 for MacBook)")
     parser.add_argument("--games", type=str, default=None,
                        help="Comma-separated game numbers to use (default: all)")
+    parser.add_argument("--board_context", action="store_true",
+                       help="Enable board-level Transformer context between squares")
 
     args = parser.parse_args()
 
@@ -265,8 +267,11 @@ def main():
         pretrained=True,
         freeze_backbone=False,
         dropout=0.3,
-        freeze_ratio=0.6
+        freeze_ratio=0.6,
+        use_board_context=args.board_context
     )
+    if args.board_context:
+        print("  Board-level Transformer context ENABLED")
 
     # Compute class weights
     print("\nComputing class weights...")
@@ -288,7 +293,7 @@ def main():
         unfreeze_lr_factor=0.5
     )
 
-    history = trainer.train(num_epochs=args.epochs)
+    trainer.train(num_epochs=args.epochs)
     
     # Generate visualizations
     print("\nGenerating training curves...")
@@ -342,7 +347,6 @@ def main():
             per_class_results.append({"class": CLASS_NAMES[c], "correct": 0, "total": 0, "accuracy": 0.0})
 
     # Confusion matrix (save as CSV)
-    from collections import Counter
     confusion = np.zeros((14, 14), dtype=int)
     for pred, label in zip(all_preds, all_labels):
         confusion[label][pred] += 1
