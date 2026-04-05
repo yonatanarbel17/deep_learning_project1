@@ -206,12 +206,63 @@ EPOCH-BY-EPOCH SUMMARY
         report += f"Epoch {int(row['epoch']):2d}: Train={row['train_acc']*100:5.2f}%, Val={row['val_acc']*100:5.2f}%\n"
     
     report += "\n================================================================================"
-    
+
     # Save report
     report_path = os.path.join(output_dir, "training_report.txt")
     with open(report_path, 'w') as f:
         f.write(report)
-    
+
     print(f"Training report saved to: {report_path}")
     return report
+
+
+def generate_chess_diagram(fen: str, output_path: str, unknown_squares: list = None):
+    """
+    Generate a chess diagram image from a FEN string using python-chess.
+
+    Args:
+        fen: FEN string (board part only or full FEN)
+        output_path: Path to save the SVG/PNG output
+        unknown_squares: Optional list of square indices (0-63) to mark as occluded
+    """
+    if not CHESS_AVAILABLE:
+        print("Warning: python-chess not installed, skipping diagram generation")
+        return
+
+    # Handle board-only FEN (no side-to-move etc.)
+    fen_board = fen.split()[0] if ' ' in fen else fen
+
+    # Replace 'X' (unknown/occluded) with '1' (empty) for python-chess compatibility
+    fen_clean = fen_board.replace('X', '1')
+
+    # Collapse consecutive digits (e.g., '11' -> '2')
+    import re
+    def collapse_digits(s):
+        return re.sub(r'(\d+)', lambda m: str(sum(int(c) for c in m.group(1))), s)
+    fen_clean = '/'.join(collapse_digits(rank) for rank in fen_clean.split('/'))
+
+    board = chess.Board(fen_clean + " w - - 0 1")
+
+    # Highlight occluded squares in red
+    fill = {}
+    if unknown_squares:
+        for sq_idx in unknown_squares:
+            # Convert our index (row 0=rank 8, col 0=a) to python-chess square
+            row, col = divmod(sq_idx, 8)
+            chess_sq = chess.square(col, 7 - row)
+            fill[chess_sq] = "#ff6666"
+
+    svg_data = chess.svg.board(board=board, fill=fill, size=400)
+
+    if output_path.endswith('.svg'):
+        with open(output_path, 'w') as f:
+            f.write(svg_data)
+    else:
+        # Save as SVG, then convert to PNG if possible
+        svg_path = output_path.rsplit('.', 1)[0] + '.svg'
+        with open(svg_path, 'w') as f:
+            f.write(svg_data)
+        output_path = svg_path
+
+    print(f"Chess diagram saved to: {output_path}")
 

@@ -28,7 +28,7 @@ from data.data_loader import grid_to_fen
 from models.classifier import create_model
 from inference.predictor import BoardPredictor, get_prediction_summary
 from training.trainer import get_device
-from utils.visualization import visualize_prediction
+from utils.visualization import visualize_prediction, generate_chess_diagram
 
 
 def evaluate_single_image(
@@ -111,8 +111,14 @@ def evaluate_single_image(
     )
     
     print(f"\nVisualization saved to: {output_path}")
+
+    # Generate chess diagram using python-chess
+    unknown_squares = [i for i in range(64) if grid[i // 8][i % 8] == 'X']
+    diagram_path = os.path.join(output_dir, "prediction_diagram.svg")
+    generate_chess_diagram(fen, diagram_path, unknown_squares=unknown_squares)
+
     print("="*60)
-    
+
     return grid, fen
 
 
