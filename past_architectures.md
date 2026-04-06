@@ -231,3 +231,81 @@
   - Lower dropout (0.3 vs 0.4) gave model more capacity
 - **Temperature 1.2439:** Still slightly overconfident but improving (was 1.2559 in Run 2)
 - **Room for improvement:** Occluded class (87.4%) and queens (91%) are the main weak spots
+
+---
+
+## Run 4 — EfficientNet-B2 (50 Epochs, Constant LR)
+
+**Date:** 2026-04-06
+**Branch:** shick
+**Status:** Completed (50 epochs)
+
+### Architecture
+- **Backbone:** EfficientNet-B2 (pretrained ImageNet)
+- **Classifier head:** Dropout(0.3) → Linear(1408, 14)
+- **Frozen layers:** 179/299 (60%) for epochs 1-3, then fully unfrozen
+- **Gradual unfreezing:** At epoch 4, all layers unfrozen, LR halved (5e-5 → 2.5e-5)
+- **Input:** 512×512 board → 64 squares with 70% overlap padding → 224×224 per square
+
+### Training Config
+- **LR:** 5e-5 → 2.5e-5 at epoch 4, then 1.25e-5 at epoch 49 (ReduceLROnPlateau triggered)
+- **Batch size:** 4 boards
+- **Label smoothing:** 0.1
+- **Class weights:** Inverse-frequency
+- **WeightedRandomSampler:** Yes (board-level)
+- **Gradient clipping:** max_norm=1.0
+- **LR scheduler:** ReduceLROnPlateau (patience=3, factor=0.5) — triggered once at epoch 49
+- **Early stopping:** patience=5 — never activated
+
+### Data
+- Same as Run 3 (frame-group split, 2385 train / 595 val)
+- **Augmentations (online):** ColorJitter(0.1/0.1), ±5° rotation, RandomGrayscale(0.1), GaussianBlur(0.2), RandomErasing(0.25)
+
+### Results (key epochs)
+| Epoch | Train Acc | Val Acc | Val Loss | LR |
+|-------|-----------|---------|----------|----|
+| 3     | 74.30%    | 79.57%  | 2.1606   | 5.00e-05 |
+| 4*    | 78.50%    | 83.04%  | 2.0633   | 2.50e-05 |
+| 10    | 88.31%    | 91.28%  | 1.9133   | 2.50e-05 |
+| 15    | 91.60%    | 93.38%  | 1.8761   | 2.50e-05 |
+| 20    | 93.66%    | 94.42%  | 1.8637   | 2.50e-05 |
+| 25    | 94.02%    | 94.97%  | 1.8582   | 2.50e-05 |
+| 30    | 94.74%    | 95.37%  | 1.8664   | 2.50e-05 |
+| 35    | 94.85%    | 95.69%  | 1.8608   | 2.50e-05 |
+| 40    | 95.70%    | 95.80%  | 1.8626   | 2.50e-05 |
+| 45    | 96.25%    | 95.99%  | 1.8583   | 2.50e-05 |
+| 50    | 96.84%    | 96.06%  | 1.8631   | 1.25e-05 |
+
+*Epoch 4: all layers unfrozen, LR halved
+
+**Best val accuracy:** 96.06% (epoch 50)
+**Overfit gap:** +0.78% (train now slightly above val — first sign of overfitting)
+**Optimal OOD threshold:** 0.1 (score=0.9606)
+**Calibrated temperature:** 1.2361
+
+### Per-Class Accuracy
+| Class | Correct | Total | Accuracy | vs Run 3 |
+|-------|---------|-------|----------|----------|
+| P (white pawn) | 3090 | 3240 | 95.37% | +0.1% |
+| N (white knight) | 625 | 665 | 93.98% | same |
+| B (white bishop) | 558 | 600 | 93.00% | same |
+| R (white rook) | 807 | 840 | 96.07% | -0.7% |
+| Q (white queen) | 306 | 335 | 91.34% | +0.3% |
+| K (white king) | 549 | 580 | 94.66% | +0.2% |
+| p (black pawn) | 2892 | 3020 | 95.76% | +0.5% |
+| n (black knight) | 464 | 500 | 92.80% | same |
+| b (black bishop) | 644 | 665 | 96.84% | +0.5% |
+| r (black rook) | 816 | 830 | 98.31% | same |
+| q (black queen) | 304 | 335 | 90.75% | -0.9% |
+| k (black king) | 550 | 580 | 94.83% | -0.3% |
+| empty | 24445 | 25280 | 96.70% | +1.6% |
+| occluded | 531 | 610 | 87.05% | -0.3% |
+
+### Analysis
+- **+1.1% over Run 3:** 96.06% vs 94.97% — more epochs helped, but with diminishing returns
+- **Overfit gap turning positive:** 0.78% gap, first run where train > val. Still small but trend is clear
+- **Val loss plateaued:** Oscillating around 1.86 since epoch 19, no longer decreasing
+- **ReduceLROnPlateau finally triggered** at epoch 49 (3 epochs without improvement), dropping LR to 1.25e-5
+- **Weak spots unchanged:** Queens (91%), occluded (87%), knights (93%) didn't improve with more epochs — these need targeted solutions, not just longer training
+- **Empty squares improved most:** 95.1% → 96.7%, the dominant class benefited from more training
+- **Conclusion:** Model is near convergence at constant LR. Further gains need architectural or data-level changes, not more epochs
