@@ -198,7 +198,7 @@ def main():
                        help="Batch size (boards per batch)")
     parser.add_argument("--lr", type=float, default=5e-5,
                        help="Learning rate")
-    parser.add_argument("--backbone", type=str, default="resnet18",
+    parser.add_argument("--backbone", type=str, default="efficientnet_b2",
                        choices=["resnet18", "resnet34", "resnet50", "efficientnet_b2"],
                        help="Model backbone")
     parser.add_argument("--board_size", type=int, default=512,
