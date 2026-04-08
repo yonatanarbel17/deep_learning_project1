@@ -393,6 +393,17 @@ def main():
     print(f"Calibrated temp:     {calibrated_temp:.4f}")
     print(f"{'='*60}\n")
 
+    # Auto-commit model to repo
+    import subprocess
+    try:
+        subprocess.run(["git", "add", os.path.join(args.output_dir, "best_model.pth")], check=True)
+        subprocess.run(["git", "commit", "-m", "Add trained EfficientNet-B2 model weights"], check=True)
+        subprocess.run(["git", "push", "origin", "main"], check=True)
+        print("Model weights pushed to repo successfully!")
+    except Exception as e:
+        print(f"Auto-push failed ({e}). Push manually with:")
+        print(f"  git add {args.output_dir}/best_model.pth && git commit -m 'Add model' && git push origin main")
+
 
 if __name__ == "__main__":
     main()
