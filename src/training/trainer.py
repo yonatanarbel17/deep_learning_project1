@@ -215,6 +215,20 @@ class Trainer:
                 self.epochs_without_improvement = 0
                 torch.save(self.model.state_dict(),
                           os.path.join(self.output_dir, "best_model.pth"))
+                # Backup to Google Drive if available
+                drive_backup = "/content/drive/MyDrive/chess_model_backup"
+                if os.path.exists("/content/drive/MyDrive"):
+                    os.makedirs(drive_backup, exist_ok=True)
+                    torch.save(self.model.state_dict(),
+                              os.path.join(drive_backup, "best_model.pth"))
+                    torch.save({
+                        'epoch': epoch,
+                        'best_val_acc': self.best_val_acc,
+                        'optimizer': self.optimizer.state_dict(),
+                        'scheduler': self.scheduler.state_dict(),
+                        'unfrozen': self.unfrozen,
+                    }, os.path.join(drive_backup, "checkpoint.pth"))
+                    print(f"  >> Backed up to Google Drive (val_acc={val_acc:.4f})")
             else:
                 self.epochs_without_improvement += 1
 
