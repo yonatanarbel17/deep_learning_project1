@@ -19,8 +19,8 @@ __pycache__/
 *.swo
 *~
 
-# Model weights
-*.pth
+# Model weights (keep outputs/best_model.pth tracked)
+# *.pth
 
 # Environment
 venv/
