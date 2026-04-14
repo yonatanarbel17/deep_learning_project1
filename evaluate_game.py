@@ -111,7 +111,7 @@ def main():
         return
 
     # Create dataset (val transforms only - no augmentation)
-    _, val_transform = get_default_transforms()
+    val_transform = get_default_transforms(is_training=False)
     dataset = ChessboardDataset(df, transform=val_transform)
     loader = torch.utils.data.DataLoader(
         dataset, batch_size=args.batch_size, shuffle=False,
