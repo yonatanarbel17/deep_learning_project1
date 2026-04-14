@@ -98,6 +98,7 @@ def main():
     parser.add_argument("--backbone", type=str, default="efficientnet_b2")
     parser.add_argument("--batch_size", type=int, default=4)
     parser.add_argument("--board_context", action="store_true")
+    parser.add_argument("--original_only", action="store_true", help="Only use original game data (no augmented variants)")
     args = parser.parse_args()
 
     game_numbers = [int(g.strip()) for g in args.games.split(",")]
@@ -106,6 +107,11 @@ def main():
 
     # Load data
     df = load_game_data(args.data_root, game_numbers)
+    if args.original_only and len(df) > 0:
+        # Keep only samples from original folders (no _bright, _dark, _color, _noisy)
+        original_mask = df['image_path'].apply(lambda p: not any(s in p for s in ['_bright', '_dark', '_color', '_noisy']))
+        df = df[original_mask].reset_index(drop=True)
+        print(f"Filtered to original only: {len(df)} samples")
     if len(df) == 0:
         print("ERROR: No data loaded.")
         return
