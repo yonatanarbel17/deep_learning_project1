@@ -8,13 +8,27 @@ A deep learning system that classifies each of the 64 chessboard squares from re
 
 ## Environment Setup
 
+**Python version:** 3.10+ recommended (tested on 3.10 and 3.12)
+
 ```bash
 git clone https://github.com/yonatanarbel17/deep_learning_project1.git
 cd deep_learning_project1
+
+# Create virtual environment (choose one):
+# Option A: venv
+python -m venv venv
+source venv/bin/activate   # Linux/Mac
+# venv\Scripts\activate    # Windows
+
+# Option B: conda
+conda create -n chess python=3.10
+conda activate chess
+
+# Install dependencies
 pip install -r requirements.txt
 ```
 
-**Requirements:** Python 3.8+, CUDA GPU recommended. The `timm` library is required for the EfficientNet-B2 backbone.
+**Requirements:** Python 3.10+, CUDA GPU recommended for training (inference works on CPU). The `timm` library is required for the EfficientNet-B2 backbone.
 
 ## Training
 
@@ -49,6 +63,23 @@ The training script will:
 !pip install timm
 !python train.py --data_root data --epochs 50
 ```
+
+## Demo (Quick Inference)
+
+Run the model on a single chess board image:
+
+```bash
+# From an image file
+python demo.py --image path/to/board_image.jpg
+
+# From a game frame
+python demo.py --game_dir data/game2_per_frame --frame 200
+
+# With custom output directory
+python demo.py --image path/to/board.jpg --output_dir results
+```
+
+This will print the predicted FEN string and save a visualization (original image + predicted board) to the `results/` directory.
 
 ## Inference / Evaluation
 
