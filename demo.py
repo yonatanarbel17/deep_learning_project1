@@ -37,60 +37,162 @@ from inference.predictor import BoardPredictor
 from training.trainer import get_device
 
 
+def grid_to_chess_board(pred_grid):
+    """Convert prediction grid to a python-chess Board, returning board and list of occluded squares."""
+    import chess
+    # Map our class IDs to python-chess piece objects
+    id_to_piece = {
+        0: chess.Piece(chess.PAWN, chess.WHITE),
+        1: chess.Piece(chess.KNIGHT, chess.WHITE),
+        2: chess.Piece(chess.BISHOP, chess.WHITE),
+        3: chess.Piece(chess.ROOK, chess.WHITE),
+        4: chess.Piece(chess.QUEEN, chess.WHITE),
+        5: chess.Piece(chess.KING, chess.WHITE),
+        6: chess.Piece(chess.PAWN, chess.BLACK),
+        7: chess.Piece(chess.KNIGHT, chess.BLACK),
+        8: chess.Piece(chess.BISHOP, chess.BLACK),
+        9: chess.Piece(chess.ROOK, chess.BLACK),
+        10: chess.Piece(chess.QUEEN, chess.BLACK),
+        11: chess.Piece(chess.KING, chess.BLACK),
+    }
+    board = chess.Board(fen=None)  # empty board
+    occluded_squares = []
+    for row in range(8):
+        for col in range(8):
+            square = chess.square(col, 7 - row)  # chess lib: a1=0, row 0 = rank 1
+            cell = pred_grid[row, col]
+            if cell == 'unknown' or cell == 13:
+                occluded_squares.append(square)
+            elif cell in id_to_piece:
+                board.set_piece_at(square, id_to_piece[cell])
+    return board, occluded_squares
+
+
+def render_board_svg(board, occluded_squares, output_path):
+    """Render a chess board as SVG with red X marks on occluded squares, then convert to PNG."""
+    import chess.svg
+    import re
+
+    # Color occluded squares with a light fill
+    fill_map = {sq: "#ffcccc" for sq in occluded_squares}
+
+    svg_str = chess.svg.board(board, squares=chess.SquareSet(occluded_squares),
+                              fill=fill_map, size=400, coordinates=True)
+
+    # Add red X marks on occluded squares by injecting SVG elements
+    for sq in occluded_squares:
+        col = chess.square_file(sq)
+        row = 7 - chess.square_rank(sq)
+        # SVG coordinate system: board area starts at x=15, y=15, each square is ~46.25px
+        sq_size = 48.125
+        margin = 15
+        x = margin + col * sq_size
+        y = margin + row * sq_size
+        pad = sq_size * 0.2
+        # Draw red X
+        x_mark = (
+            f'<line x1="{x+pad}" y1="{y+pad}" x2="{x+sq_size-pad}" y2="{y+sq_size-pad}" '
+            f'stroke="red" stroke-width="4" stroke-linecap="round"/>'
+            f'<line x1="{x+sq_size-pad}" y1="{y+pad}" x2="{x+pad}" y2="{y+sq_size-pad}" '
+            f'stroke="red" stroke-width="4" stroke-linecap="round"/>'
+        )
+        svg_str = svg_str.replace('</svg>', x_mark + '</svg>')
+
+    # Save SVG
+    svg_path = output_path.replace('.png', '.svg')
+    with open(svg_path, 'w') as f:
+        f.write(svg_str)
+
+    # Convert SVG to PNG using cairosvg if available, otherwise save SVG only
+    try:
+        import cairosvg
+        cairosvg.svg2png(bytestring=svg_str.encode(), write_to=output_path, output_width=800)
+    except ImportError:
+        # Fallback: use matplotlib to render SVG
+        from matplotlib import image as mpimg
+        import io
+        try:
+            from PIL import Image as PILImage
+            # Save SVG and render with matplotlib
+            fig, ax = plt.subplots(1, 1, figsize=(8, 8))
+            ax.text(0.5, 0.5, 'See SVG file', ha='center', va='center', fontsize=14)
+            ax.axis('off')
+            plt.savefig(output_path, dpi=150, bbox_inches='tight')
+            plt.close()
+            print(f"  (Install cairosvg for PNG output: pip install cairosvg)")
+        except Exception:
+            pass
+
+    return svg_path
+
+
 def visualize_prediction(original_img, pred_grid, pred_fen, confidences, output_path,
                          true_grid=None, true_fen=None, threshold=0.1):
-    """Create side-by-side visualization of original image, prediction, and optionally ground truth."""
+    """Create chess diagram visualization with red X on occluded squares."""
+    import chess
+    import chess.svg
+
+    # Build chess board from predictions
+    board, occluded_squares = grid_to_chess_board(pred_grid)
+
+    # Render the board diagram as SVG
+    board_svg_path = render_board_svg(board, occluded_squares, output_path)
+    print(f"Board diagram saved to: {board_svg_path}")
+
+    # Also create a side-by-side with original image if possible
+    fig_path = output_path.replace('.png', '_full.png')
+    num_panels = 2 if true_grid is None else 3
+    fig = plt.figure(figsize=(7 * num_panels, 7))
+
+    # Panel 1: Original image
+    ax1 = plt.subplot(1, num_panels, 1)
+    ax1.imshow(original_img)
+    ax1.set_title('Input Image', fontsize=16, weight='bold')
+    ax1.axis('off')
+
+    # Panel 2: Predicted board (matplotlib version with X marks)
+    ax2 = plt.subplot(1, num_panels, 2)
     id_to_char = {
         0: '♙', 1: '♘', 2: '♗', 3: '♖', 4: '♕', 5: '♔',
         6: '♟', 7: '♞', 8: '♝', 9: '♜', 10: '♛', 11: '♚',
-        12: '·', 'unknown': '?'
+        12: ' '
     }
-
-    num_panels = 3 if true_grid is not None else 2
-    fig = plt.figure(figsize=(8 * num_panels, 10))
-
-    # Original image
-    ax1 = plt.subplot(1, num_panels, 1)
-    ax1.imshow(original_img)
-    ax1.set_title('Original Image', fontsize=18, weight='bold')
-    ax1.axis('off')
-
-    # Predicted board
-    ax2 = plt.subplot(1, num_panels, 2)
     for row in range(8):
         for col in range(8):
-            color = '#F0D9B5' if (row + col) % 2 == 0 else '#B58863'
+            cell = pred_grid[row, col]
+            if cell == 'unknown' or cell == 13:
+                # Occluded: light red background
+                color = '#ffcccc' if (row + col) % 2 == 0 else '#e6a0a0'
+            else:
+                color = '#F0D9B5' if (row + col) % 2 == 0 else '#B58863'
             rect = plt.Rectangle((col, 7 - row), 1, 1, facecolor=color)
             ax2.add_patch(rect)
 
-            cell = pred_grid[row, col]
-            char = id_to_char.get(cell, '?')
-            text_color = 'red' if cell == 'unknown' else 'black'
-
-            ax2.text(col + 0.5, 7 - row + 0.5, char,
-                     fontsize=56, ha='center', va='center',
-                     color=text_color, weight='bold')
-
-            # Confidence score
-            if confidences is not None:
-                conf = confidences[row, col]
-                conf_color = 'green' if conf >= 0.7 else 'orange' if conf >= 0.4 else 'red'
-                ax2.text(col + 0.85, 7 - row + 0.15, f'{conf:.2f}',
-                         fontsize=14, ha='right', va='bottom',
-                         color=conf_color, weight='bold')
+            if cell == 'unknown' or cell == 13:
+                # Draw red X
+                pad = 0.2
+                ax2.plot([col + pad, col + 1 - pad], [7 - row + pad, 7 - row + 1 - pad],
+                         color='red', linewidth=3, solid_capstyle='round')
+                ax2.plot([col + 1 - pad, col + pad], [7 - row + pad, 7 - row + 1 - pad],
+                         color='red', linewidth=3, solid_capstyle='round')
+            else:
+                char = id_to_char.get(cell, '?')
+                if char.strip():
+                    ax2.text(col + 0.5, 7 - row + 0.5, char,
+                             fontsize=36, ha='center', va='center',
+                             color='black', weight='bold')
 
     ax2.set_xlim(0, 8)
     ax2.set_ylim(0, 8)
     ax2.set_aspect('equal')
     for i, label in enumerate('abcdefgh'):
-        ax2.text(i + 0.5, -0.3, label, fontsize=18, ha='center', weight='bold')
+        ax2.text(i + 0.5, -0.3, label, fontsize=14, ha='center', weight='bold')
     for i in range(8):
-        ax2.text(-0.3, i + 0.5, str(i + 1), fontsize=18, ha='center', va='center', weight='bold')
+        ax2.text(-0.3, i + 0.5, str(i + 1), fontsize=14, ha='center', va='center', weight='bold')
     ax2.axis('off')
-    ax2.set_title(f'Predicted Board\nFEN: {pred_fen}\nThreshold: {threshold}',
-                  fontsize=16, weight='bold')
+    ax2.set_title(f'Prediction\nFEN: {pred_fen}', fontsize=14, weight='bold')
 
-    # Ground truth board (if available)
+    # Panel 3: Ground truth (if available)
     if true_grid is not None:
         ax3 = plt.subplot(1, num_panels, 3)
         for row in range(8):
@@ -98,22 +200,21 @@ def visualize_prediction(original_img, pred_grid, pred_fen, confidences, output_
                 color = '#F0D9B5' if (row + col) % 2 == 0 else '#B58863'
                 rect = plt.Rectangle((col, 7 - row), 1, 1, facecolor=color)
                 ax3.add_patch(rect)
-
                 cell = true_grid[row, col]
                 char = id_to_char.get(cell, '?')
-                ax3.text(col + 0.5, 7 - row + 0.5, char,
-                         fontsize=56, ha='center', va='center',
-                         color='black', weight='bold')
-
+                if char.strip():
+                    ax3.text(col + 0.5, 7 - row + 0.5, char,
+                             fontsize=36, ha='center', va='center',
+                             color='black', weight='bold')
         ax3.set_xlim(0, 8)
         ax3.set_ylim(0, 8)
         ax3.set_aspect('equal')
         for i, label in enumerate('abcdefgh'):
-            ax3.text(i + 0.5, -0.3, label, fontsize=18, ha='center', weight='bold')
+            ax3.text(i + 0.5, -0.3, label, fontsize=14, ha='center', weight='bold')
         for i in range(8):
-            ax3.text(-0.3, i + 0.5, str(i + 1), fontsize=18, ha='center', va='center', weight='bold')
+            ax3.text(-0.3, i + 0.5, str(i + 1), fontsize=14, ha='center', va='center', weight='bold')
         ax3.axis('off')
-        ax3.set_title(f'Ground Truth\nFEN: {true_fen}', fontsize=16, weight='bold')
+        ax3.set_title(f'Ground Truth\nFEN: {true_fen}', fontsize=14, weight='bold')
 
     plt.tight_layout()
     plt.savefig(output_path, dpi=150, bbox_inches='tight')
