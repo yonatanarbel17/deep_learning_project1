@@ -32,6 +32,24 @@ pip install -r requirements.txt
 
 ## Training
 
+**Data format for training:** The training script uses the original data format — each game in its own folder under `data/`. The data is already included in the repository in the correct structure:
+
+```
+data/
+├── game2_per_frame/          # Original game frames
+│   ├── tagged_images/        # Frame images (frame_000200.jpg, ...)
+│   └── game2.csv             # FEN labels + occlusion annotations
+├── game2_per_frame_bright/   # Augmented variant (brightness)
+├── game2_per_frame_dark/     # Augmented variant (darkened)
+├── game2_per_frame_color/    # Augmented variant (color-shifted)
+├── game2_per_frame_noisy/    # Augmented variant (noise-injected)
+├── game4_per_frame/
+├── ...
+└── game12_per_frame_noisy/
+```
+
+> **Note:** The file `gt.csv` in the repository root contains the same data in the submission format required by the course (columns: image_name, FEN, view specification). Training uses the per-game folder format above.
+
 Train the model from scratch:
 
 ```bash
