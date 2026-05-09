@@ -73,11 +73,8 @@ def render_board_svg(board, occluded_squares, output_path):
     import chess.svg
     import re
 
-    # Color occluded squares with a light fill
-    fill_map = {sq: "#ffcccc" for sq in occluded_squares}
-
-    svg_str = chess.svg.board(board, squares=chess.SquareSet(occluded_squares),
-                              fill=fill_map, size=800, coordinates=True)
+    # No special fill — keep original square colors
+    svg_str = chess.svg.board(board, size=800, coordinates=True)
 
     # Add red X marks on occluded squares
     board_size = 800
@@ -91,9 +88,9 @@ def render_board_svg(board, occluded_squares, output_path):
         pad = sq_size * 0.12
         x_mark = (
             f'<line x1="{x+pad}" y1="{y+pad}" x2="{x+sq_size-pad}" y2="{y+sq_size-pad}" '
-            f'stroke="#cc0000" stroke-width="8" stroke-linecap="round"/>'
+            f'stroke="red" stroke-width="8" stroke-linecap="round"/>'
             f'<line x1="{x+sq_size-pad}" y1="{y+pad}" x2="{x+pad}" y2="{y+sq_size-pad}" '
-            f'stroke="#cc0000" stroke-width="8" stroke-linecap="round"/>'
+            f'stroke="red" stroke-width="8" stroke-linecap="round"/>'
         )
         svg_str = svg_str.replace('</svg>', x_mark + '</svg>')
 
@@ -159,11 +156,7 @@ def visualize_prediction(original_img, pred_grid, pred_fen, confidences, output_
     for row in range(8):
         for col in range(8):
             cell = pred_grid[row, col]
-            if cell == 'unknown' or cell == 13:
-                # Occluded: light red background
-                color = '#ffcccc' if (row + col) % 2 == 0 else '#e6a0a0'
-            else:
-                color = '#F0D9B5' if (row + col) % 2 == 0 else '#B58863'
+            color = '#F0D9B5' if (row + col) % 2 == 0 else '#B58863'
             rect = plt.Rectangle((col, 7 - row), 1, 1, facecolor=color)
             ax2.add_patch(rect)
 
@@ -171,9 +164,9 @@ def visualize_prediction(original_img, pred_grid, pred_fen, confidences, output_
                 # Draw bold red X filling the square
                 pad = 0.12
                 ax2.plot([col + pad, col + 1 - pad], [7 - row + pad, 7 - row + 1 - pad],
-                         color='#cc0000', linewidth=6, solid_capstyle='round')
+                         color='red', linewidth=6, solid_capstyle='round')
                 ax2.plot([col + 1 - pad, col + pad], [7 - row + pad, 7 - row + 1 - pad],
-                         color='#cc0000', linewidth=6, solid_capstyle='round')
+                         color='red', linewidth=6, solid_capstyle='round')
             else:
                 char = id_to_char.get(cell, '?')
                 if char.strip():
