@@ -74,29 +74,19 @@ def visualize_prediction(original_img, pred_grid, pred_fen, confidences, output_
     # Build chess board from predictions
     board, occluded_squares = grid_to_chess_board(pred_grid)
 
-    # Render board as SVG
-    svg_str = chess.svg.board(board, size=800, coordinates=True)
+    # Render board as SVG with built-in X marks on occluded squares
+    svg_str = chess.svg.board(
+        board,
+        squares=chess.SquareSet(occluded_squares),
+        size=800,
+        coordinates=True
+    )
 
-    # python-chess SVG uses viewBox="0 0 390 390", margin=15, square=45x45
-    # Square at file f, rank r: x = 15 + f*45, y = 15 + (7-r)*45
-    margin = 15
-    sq_size = 45
-    x_marks_svg = ""
-    for sq in occluded_squares:
-        f = chess.square_file(sq)   # 0=a, 7=h
-        r = chess.square_rank(sq)   # 0=rank1, 7=rank8
-        x = margin + f * sq_size
-        y = margin + (7 - r) * sq_size
-        pad = 4  # pixels padding from edge
-        x_marks_svg += (
-            f'<line x1="{x+pad}" y1="{y+pad}" x2="{x+sq_size-pad}" y2="{y+sq_size-pad}" '
-            f'stroke="red" stroke-width="7" stroke-linecap="round"/>\n'
-            f'<line x1="{x+sq_size-pad}" y1="{y+pad}" x2="{x+pad}" y2="{y+sq_size-pad}" '
-            f'stroke="red" stroke-width="7" stroke-linecap="round"/>\n'
-        )
-
-    if x_marks_svg:
-        svg_str = svg_str.replace('</svg>', x_marks_svg + '</svg>')
+    # Change the built-in X marks from black to red, keep original board colors
+    svg_str = svg_str.replace(
+        'fill="#000" stroke="#fff" stroke-width="1.688"',
+        'fill="red" stroke="red" stroke-width="0.5"'
+    )
 
     # Save SVG
     svg_path = output_path if output_path.endswith('.svg') else output_path.replace('.png', '.svg')
