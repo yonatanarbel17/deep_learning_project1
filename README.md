@@ -6,25 +6,84 @@
 
 A deep learning system that classifies each of the 64 chessboard squares from real-world images into 14 classes (6 white pieces, 6 black pieces, empty, occluded) and reconstructs the full board state in FEN notation. Achieves **95.37% validation accuracy** using an EfficientNet-B2 backbone with gradual unfreezing.
 
-## Architecture
+## Environment Setup
 
-- **Backbone:** EfficientNet-B2 (pretrained on ImageNet)
-- **Classifier:** Linear head mapping to 14 classes (P, N, B, R, Q, K, p, n, b, r, q, k, empty, occluded)
-- **Board Detection:** OpenCV perspective correction to canonical top-down view
-- **Square Extraction:** 64 squares per board with 70% overlap padding for context
-- **OOD Detection:** Hybrid supervised occlusion class + confidence thresholding
-- **Post-Processing:** Chess rule constraints (no pawns on ranks 1/8, one king per side, piece count limits)
-- **Calibration:** Temperature scaling (T=1.24) for confidence calibration
+```bash
+git clone https://github.com/yonatanarbel17/deep_learning_project1.git
+cd deep_learning_project1
+pip install -r requirements.txt
+```
 
-## Training Strategy
+**Requirements:** Python 3.8+, CUDA GPU recommended. The `timm` library is required for the EfficientNet-B2 backbone.
 
-- **Gradual Unfreezing:** 60% backbone frozen for epochs 1-3, full fine-tuning from epoch 4 at halved LR
-- **Optimizer:** AdamW (LR=5e-5, weight_decay=1e-3)
-- **Loss:** CrossEntropy with label smoothing (0.1) and inverse-frequency class weights
-- **Scheduler:** ReduceLROnPlateau (patience=3, factor=0.5)
-- **Augmentations:** ColorJitter, random affine, Gaussian blur, random erasing, random grayscale
-- **Offline augmentations:** Bright, dark, color, and noisy variants per game
-- **Split:** Random 80/20 by (game_id, frame_number) groups to prevent augmentation leakage
+## Training
+
+Train the model from scratch:
+
+```bash
+python train.py --data_root data --epochs 50
+```
+
+Key training arguments:
+
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `--data_root` | (required) | Path to data directory containing game folders |
+| `--epochs` | 50 | Number of training epochs |
+| `--backbone` | efficientnet_b2 | Model backbone |
+| `--batch_size` | 4 | Batch size (boards) |
+| `--lr` | 5e-5 | Initial learning rate |
+
+The training script will:
+1. Load all game data and split by frame groups (80/20 train/val)
+2. Train with gradual unfreezing (60% frozen epochs 1-3, full fine-tune from epoch 4)
+3. Save the best model to `outputs/best_model.pth`
+4. Generate training curves, per-class accuracy, and confusion matrix
+5. Optimize OOD threshold and calibrate temperature
+
+### Training on Google Colab
+
+```bash
+!git clone https://github.com/yonatanarbel17/deep_learning_project1.git
+%cd deep_learning_project1
+!pip install timm
+!python train.py --data_root data --epochs 50
+```
+
+## Inference / Evaluation
+
+Evaluate the trained model on specific game(s):
+
+```bash
+python evaluate_game.py --data_root data --games 2
+```
+
+Evaluate on original frames only (no augmented variants):
+
+```bash
+python evaluate_game.py --data_root data --games 2 --original_only
+```
+
+Arguments:
+
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `--data_root` | data | Path to data directory |
+| `--model` | outputs/best_model.pth | Path to trained model weights |
+| `--games` | (required) | Comma-separated game numbers (e.g., "2" or "2,4") |
+| `--original_only` | false | Only evaluate on original (non-augmented) frames |
+
+## Occlusion Tagging Tools
+
+Tag occluded squares interactively:
+```bash
+python tag_occlusions.py --game_dir data/game5_per_frame
+```
+
+Propagate tags to augmented variants:
+```bash
+python propagate_occlusions.py --data_root data
+```
 
 ## Project Structure
 
@@ -32,8 +91,10 @@ A deep learning system that classifies each of the 64 chessboard squares from re
 ├── train.py                  # Main training script
 ├── evaluate_game.py          # Evaluate model on specific game(s)
 ├── tag_occlusions.py         # Interactive occlusion annotation tool
-├── propagate_occlusions.py   # Propagate occlusion tags to augmented variants
+├── propagate_occlusions.py   # Propagate tags to augmented variants
+├── gt.csv                    # Ground truth in submission format
 ├── past_architectures.md     # Training run history (Runs 1-4)
+├── report.pdf                # Project report
 ├── src/
 │   ├── data/
 │   │   ├── data_loader.py    # FEN parsing, label mapping
@@ -49,54 +110,16 @@ A deep learning system that classifies each of the 64 chessboard squares from re
 │       └── visualization.py  # Training curves and reports
 ├── data/                     # Training data (10 games with augmented variants)
 ├── outputs/
-│   └── best_model.pth        # Trained EfficientNet-B2 weights (95.37% val acc)
+│   └── best_model.pth        # Trained EfficientNet-B2 weights
 ├── requirements.txt
 └── pyproject.toml
-```
-
-## Usage
-
-### Training (Google Colab)
-
-```bash
-git clone https://github.com/yonatanarbel17/deep_learning_project1.git
-cd deep_learning_project1
-pip install timm
-python train.py --data_root data --epochs 50
-```
-
-### Evaluate on a specific game
-
-```bash
-python evaluate_game.py --data_root data --games 2
-```
-
-### Occlusion Tagging
-
-Tag occluded squares interactively:
-```bash
-python tag_occlusions.py --game_dir data/game5_per_frame
-```
-
-Propagate tags to augmented variants:
-```bash
-python propagate_occlusions.py --data_root data
 ```
 
 ## Results
 
 | Metric | Value |
 |--------|-------|
-| Validation Accuracy (random frame-group split) | 95.37% |
-| Game 2 Accuracy (held-out evaluation) | 99.35% |
-| Number of Classes | 14 |
-| Training Data | 10 games, 2980 boards |
-
-## Training Evolution
-
-| Run | Architecture | Val Accuracy | Key Change |
-|-----|-------------|-------------|------------|
-| 1 | EfficientNet-B2 (full fine-tune) | Overfitting | Game-level split, no freezing |
-| 2 | EfficientNet-B2 (frozen + anti-overfit) | 91.37% | Freeze layers, lower LR, frame-group split |
-| 3 | EfficientNet-B2 (gradual unfreezing) | 94.97% | Unfreeze at epoch 4, 25 epochs |
-| 4 | EfficientNet-B2 (50 epochs) | 95.37% | Extended training to 50 epochs |
+| Validation Accuracy | 95.37% |
+| Training Data | 10 games, 2,980 boards |
+| Classes | 14 (12 pieces + empty + occluded) |
+| Backbone | EfficientNet-B2 (pretrained ImageNet) |
