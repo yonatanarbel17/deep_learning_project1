@@ -23,9 +23,6 @@ from pathlib import Path
 import torch
 import numpy as np
 from PIL import Image
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
@@ -68,15 +65,19 @@ def grid_to_chess_board(pred_grid):
     return board, occluded_squares
 
 
-def render_board_svg(board, occluded_squares, output_path):
-    """Render a chess board as SVG with red X marks on occluded squares, then convert to PNG."""
+def visualize_prediction(original_img, pred_grid, pred_fen, confidences, output_path,
+                         true_grid=None, true_fen=None, threshold=0.1):
+    """Create chess diagram SVG with red X on occluded squares."""
+    import chess
     import chess.svg
-    import re
 
-    # No special fill — keep original square colors
+    # Build chess board from predictions
+    board, occluded_squares = grid_to_chess_board(pred_grid)
+
+    # Render board as SVG
     svg_str = chess.svg.board(board, size=800, coordinates=True)
 
-    # Add red X marks on occluded squares
+    # Inject red X marks on occluded squares
     board_size = 800
     margin = 15
     sq_size = (board_size - 2 * margin) / 8
@@ -98,120 +99,7 @@ def render_board_svg(board, occluded_squares, output_path):
     svg_path = output_path.replace('.png', '.svg')
     with open(svg_path, 'w') as f:
         f.write(svg_str)
-
-    # Convert SVG to PNG using cairosvg if available, otherwise save SVG only
-    try:
-        import cairosvg
-        cairosvg.svg2png(bytestring=svg_str.encode(), write_to=output_path, output_width=800)
-    except ImportError:
-        # Fallback: use matplotlib to render SVG
-        from matplotlib import image as mpimg
-        import io
-        try:
-            from PIL import Image as PILImage
-            # Save SVG and render with matplotlib
-            fig, ax = plt.subplots(1, 1, figsize=(8, 8))
-            ax.text(0.5, 0.5, 'See SVG file', ha='center', va='center', fontsize=14)
-            ax.axis('off')
-            plt.savefig(output_path, dpi=150, bbox_inches='tight')
-            plt.close()
-            print(f"  (Install cairosvg for PNG output: pip install cairosvg)")
-        except Exception:
-            pass
-
-    return svg_path
-
-
-def visualize_prediction(original_img, pred_grid, pred_fen, confidences, output_path,
-                         true_grid=None, true_fen=None, threshold=0.1):
-    """Create chess diagram visualization with red X on occluded squares."""
-    import chess
-    import chess.svg
-
-    # Build chess board from predictions
-    board, occluded_squares = grid_to_chess_board(pred_grid)
-
-    # Render the board diagram as SVG
-    board_svg_path = render_board_svg(board, occluded_squares, output_path)
-    print(f"Board diagram saved to: {board_svg_path}")
-
-    # Also create a side-by-side with original image if possible
-    fig_path = output_path.replace('.png', '_full.png')
-    num_panels = 2 if true_grid is None else 3
-    fig = plt.figure(figsize=(7 * num_panels, 7))
-
-    # Panel 1: Original image
-    ax1 = plt.subplot(1, num_panels, 1)
-    ax1.imshow(original_img)
-    ax1.set_title('Input Image', fontsize=16, weight='bold')
-    ax1.axis('off')
-
-    # Panel 2: Predicted board (matplotlib version with X marks)
-    ax2 = plt.subplot(1, num_panels, 2)
-    id_to_char = {
-        0: '♙', 1: '♘', 2: '♗', 3: '♖', 4: '♕', 5: '♔',
-        6: '♟', 7: '♞', 8: '♝', 9: '♜', 10: '♛', 11: '♚',
-        12: ' '
-    }
-    for row in range(8):
-        for col in range(8):
-            cell = pred_grid[row, col]
-            color = '#F0D9B5' if (row + col) % 2 == 0 else '#B58863'
-            rect = plt.Rectangle((col, 7 - row), 1, 1, facecolor=color)
-            ax2.add_patch(rect)
-
-            if cell == 'unknown' or cell == 13:
-                # Draw bold red X filling the square
-                pad = 0.08
-                ax2.plot([col + pad, col + 1 - pad], [7 - row + pad, 7 - row + 1 - pad],
-                         color='red', linewidth=14, solid_capstyle='butt')
-                ax2.plot([col + 1 - pad, col + pad], [7 - row + pad, 7 - row + 1 - pad],
-                         color='red', linewidth=14, solid_capstyle='butt')
-            else:
-                char = id_to_char.get(cell, '?')
-                if char.strip():
-                    ax2.text(col + 0.5, 7 - row + 0.5, char,
-                             fontsize=36, ha='center', va='center',
-                             color='black', weight='bold')
-
-    ax2.set_xlim(0, 8)
-    ax2.set_ylim(0, 8)
-    ax2.set_aspect('equal')
-    for i, label in enumerate('abcdefgh'):
-        ax2.text(i + 0.5, -0.3, label, fontsize=14, ha='center', weight='bold')
-    for i in range(8):
-        ax2.text(-0.3, i + 0.5, str(i + 1), fontsize=14, ha='center', va='center', weight='bold')
-    ax2.axis('off')
-    ax2.set_title(f'Prediction\nFEN: {pred_fen}', fontsize=14, weight='bold')
-
-    # Panel 3: Ground truth (if available)
-    if true_grid is not None:
-        ax3 = plt.subplot(1, num_panels, 3)
-        for row in range(8):
-            for col in range(8):
-                color = '#F0D9B5' if (row + col) % 2 == 0 else '#B58863'
-                rect = plt.Rectangle((col, 7 - row), 1, 1, facecolor=color)
-                ax3.add_patch(rect)
-                cell = true_grid[row, col]
-                char = id_to_char.get(cell, '?')
-                if char.strip():
-                    ax3.text(col + 0.5, 7 - row + 0.5, char,
-                             fontsize=36, ha='center', va='center',
-                             color='black', weight='bold')
-        ax3.set_xlim(0, 8)
-        ax3.set_ylim(0, 8)
-        ax3.set_aspect('equal')
-        for i, label in enumerate('abcdefgh'):
-            ax3.text(i + 0.5, -0.3, label, fontsize=14, ha='center', weight='bold')
-        for i in range(8):
-            ax3.text(-0.3, i + 0.5, str(i + 1), fontsize=14, ha='center', va='center', weight='bold')
-        ax3.axis('off')
-        ax3.set_title(f'Ground Truth\nFEN: {true_fen}', fontsize=14, weight='bold')
-
-    plt.tight_layout()
-    plt.savefig(output_path, dpi=150, bbox_inches='tight')
-    plt.close()
-    print(f"Visualization saved to: {output_path}")
+    print(f"Board diagram saved to: {svg_path}")
 
 
 def run_inference(image_path, model_path, output_dir, game_dir=None, frame=None,
@@ -284,7 +172,7 @@ def run_inference(image_path, model_path, output_dir, game_dir=None, frame=None,
     # Save visualization
     os.makedirs(output_dir, exist_ok=True)
     img_name = Path(image_path).stem
-    output_path = os.path.join(output_dir, f"{img_name}_prediction.png")
+    output_path = os.path.join(output_dir, f"{img_name}_prediction.svg")
     visualize_prediction(img, grid, fen, confidences, output_path,
                          true_grid=true_grid, true_fen=true_fen, threshold=threshold)
 
