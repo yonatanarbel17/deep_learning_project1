@@ -228,8 +228,8 @@
   }
   .pipe-step:hover { border-color: var(--accent); transform: translateY(-3px); }
   .pipe-step .pipe-icon { font-size: 1.6em; margin-bottom: 4px; }
-  .pipe-step .pipe-title { font-weight: 600; font-size: 0.9em; }
-  .pipe-step .pipe-sub { font-size: 0.8em; color: var(--text-muted); }
+  .pipe-step .pipe-title { font-weight: 600; font-size: 0.95em; }
+  .pipe-step .pipe-sub { font-size: 0.88em; color: var(--text-muted); }
   .pipe-step.active-step { border-color: var(--accent); background: rgba(37,99,235,0.06); animation: pulse 2s infinite; }
   .pipe-arrow { color: var(--text-muted); font-size: 1.2em; padding: 0 6px; }
 
@@ -258,7 +258,7 @@
   /* ===== BAR CHART ===== */
   .bar-chart { display: flex; flex-direction: column; gap: 6px; }
   .bar-row { display: flex; align-items: center; gap: 10px; }
-  .bar-label { width: 105px; text-align: right; font-size: 0.88em; color: var(--text-dim); white-space: nowrap; }
+  .bar-label { width: 105px; text-align: right; font-size: 0.95em; color: var(--text-dim); white-space: nowrap; }
   .bar-track { flex: 1; height: 22px; background: #e2e8f0; border-radius: 6px; overflow: hidden; position: relative; }
   .bar-fill {
     height: 100%;
@@ -267,7 +267,7 @@
     align-items: center;
     justify-content: flex-end;
     padding-right: 8px;
-    font-size: 0.82em;
+    font-size: 0.9em;
     font-weight: 600;
     color: #fff;
     transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
@@ -278,7 +278,7 @@
   .bar-fill.yellow { background: linear-gradient(90deg, #d97706, var(--accent4)); }
   .bar-fill.red { background: linear-gradient(90deg, #dc2626, var(--danger)); }
   .bar-fill.purple { background: linear-gradient(90deg, #7c3aed, var(--accent2)); }
-  .bar-val { font-size: 0.88em; font-weight: 600; min-width: 48px; color: var(--text-dim); }
+  .bar-val { font-size: 0.95em; font-weight: 600; min-width: 48px; color: var(--text-dim); }
 
   /* ===== RUN CARDS ===== */
   .run-card {
@@ -305,13 +305,13 @@
   /* ===== FREEZE DIAGRAM ===== */
   .freeze-row {
     display: flex; align-items: center; gap: 10px;
-    margin-bottom: 8px; font-size: 0.85em;
+    margin-bottom: 8px; font-size: 0.95em;
   }
   .freeze-label { width: 130px; color: var(--text-dim); text-align: right; }
   .freeze-bar {
     height: 24px; border-radius: 8px; flex: 1;
     display: flex; align-items: center; justify-content: center;
-    font-size: 0.75em; font-weight: 600;
+    font-size: 0.85em; font-weight: 600;
   }
   .frozen { background: #cbd5e1; color: #64748b; border: 1px solid var(--border); }
   .training { background: linear-gradient(90deg, var(--accent), var(--accent2)); color: #fff; }
@@ -338,8 +338,8 @@
     transition: all 0.3s;
   }
   .fail-item:hover { background: #f1f5f9; }
-  .fail-item h4 { font-size: 1.02em; font-weight: 600; margin-bottom: 4px; }
-  .fail-item p { font-size: 0.92em; color: var(--text-dim); line-height: 1.5; }
+  .fail-item h4 { font-size: 1.1em; font-weight: 600; margin-bottom: 4px; }
+  .fail-item p { font-size: 1em; color: var(--text-dim); line-height: 1.5; }
 
   /* ===== TAKEAWAY ===== */
   .takeaway {
@@ -404,7 +404,7 @@
 
   /* ===== ABLATION DELTA BARS ===== */
   .abl-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-  .abl-label { width: 280px; font-size: 0.82em; color: var(--text-dim); text-align: right; }
+  .abl-label { width: 280px; font-size: 0.95em; color: var(--text-dim); text-align: right; }
   .abl-bar-wrap { flex: 1; position: relative; height: 28px; }
   .abl-bar {
     position: absolute;
@@ -774,38 +774,38 @@
 <div class="slide v-center" id="s10">
   <h2 class="anim-1"><span class="gradient-text">Ablation</span> Study</h2>
   <div class="chart-container anim-2" style="padding:30px;">
-    <svg viewBox="0 0 750 280" style="height:280px;">
-      <line x1="530" y1="0" x2="530" y2="280" stroke="var(--accent3)" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.4"/>
-      <text x="535" y="15" fill="var(--accent3)" font-size="10" opacity="0.6">95.37% (baseline)</text>
-      <text x="240" y="38" fill="var(--text-dim)" font-size="11" text-anchor="end">No offline augmentation</text>
-      <rect x="248" y="24" width="282" height="24" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
-      <rect x="350" y="26" width="180" height="20" rx="3" fill="url(#redGrad)" opacity="0.85" style="animation: growWidth 1s ease 0.6s both;"/>
-      <text x="345" y="40" fill="var(--danger)" font-size="10" font-weight="600" text-anchor="end">-7.25%</text>
-      <text x="255" y="40" fill="var(--text-muted)" font-size="9">88.12%</text>
-      <text x="240" y="78" fill="var(--text-dim)" font-size="11" text-anchor="end">ResNet-18 instead of EffNet-B2</text>
-      <rect x="248" y="64" width="282" height="24" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
-      <rect x="382" y="66" width="148" height="20" rx="3" fill="url(#redGrad)" opacity="0.8" style="animation: growWidth 1s ease 0.75s both;"/>
-      <text x="377" y="80" fill="var(--danger)" font-size="10" font-weight="600" text-anchor="end">-5.96%</text>
-      <text x="255" y="80" fill="var(--text-muted)" font-size="9">89.41%</text>
-      <text x="240" y="118" fill="var(--text-dim)" font-size="11" text-anchor="end">No gradual unfreezing</text>
-      <rect x="248" y="104" width="282" height="24" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
-      <rect x="430" y="106" width="100" height="20" rx="3" fill="url(#orangeGrad)" opacity="0.8" style="animation: growWidth 1s ease 0.9s both;"/>
-      <text x="425" y="120" fill="var(--accent4)" font-size="10" font-weight="600" text-anchor="end">-4.00%</text>
-      <text x="255" y="120" fill="var(--text-muted)" font-size="9">91.37%</text>
-      <text x="240" y="158" fill="var(--text-dim)" font-size="11" text-anchor="end">No class weights</text>
-      <rect x="248" y="144" width="282" height="24" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
-      <rect x="466" y="146" width="64" height="20" rx="3" fill="url(#orangeGrad)" opacity="0.7" style="animation: growWidth 1s ease 1.05s both;"/>
-      <text x="461" y="160" fill="var(--accent4)" font-size="10" font-weight="600" text-anchor="end">-2.57%</text>
-      <text x="255" y="160" fill="var(--text-muted)" font-size="9">92.80%</text>
-      <text x="240" y="198" fill="var(--text-dim)" font-size="11" text-anchor="end">No label smoothing</text>
-      <rect x="248" y="184" width="282" height="24" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
-      <rect x="494" y="186" width="36" height="20" rx="3" fill="url(#blueGrad)" opacity="0.7" style="animation: growWidth 1s ease 1.2s both;"/>
-      <text x="489" y="200" fill="var(--accent)" font-size="10" font-weight="600" text-anchor="end">-1.42%</text>
-      <text x="255" y="200" fill="var(--text-muted)" font-size="9">93.95%</text>
-      <text x="240" y="248" fill="var(--text)" font-size="11" text-anchor="end" font-weight="600">Full model (final)</text>
-      <rect x="248" y="234" width="282" height="24" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
-      <rect x="248" y="236" width="282" height="20" rx="3" fill="url(#greenGrad)" opacity="0.4" style="animation: growWidth 1s ease 1.35s both;"/>
-      <text x="535" y="250" fill="var(--accent3)" font-size="10" font-weight="700">95.37%</text>
+    <svg viewBox="0 0 750 330" style="height:330px;">
+      <line x1="530" y1="0" x2="530" y2="330" stroke="var(--accent3)" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.4"/>
+      <text x="535" y="18" fill="var(--accent3)" font-size="14" opacity="0.6">95.37% (baseline)</text>
+      <text x="240" y="52" fill="var(--text-dim)" font-size="15" text-anchor="end">No offline augmentation</text>
+      <rect x="248" y="36" width="282" height="28" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
+      <rect x="350" y="38" width="180" height="24" rx="3" fill="url(#redGrad)" opacity="0.85" style="animation: growWidth 1s ease 0.6s both;"/>
+      <text x="345" y="55" fill="var(--danger)" font-size="14" font-weight="600" text-anchor="end">-7.25%</text>
+      <text x="255" y="55" fill="var(--text-muted)" font-size="12">88.12%</text>
+      <text x="240" y="102" fill="var(--text-dim)" font-size="15" text-anchor="end">ResNet-18 instead of EffNet-B2</text>
+      <rect x="248" y="86" width="282" height="28" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
+      <rect x="382" y="88" width="148" height="24" rx="3" fill="url(#redGrad)" opacity="0.8" style="animation: growWidth 1s ease 0.75s both;"/>
+      <text x="377" y="105" fill="var(--danger)" font-size="14" font-weight="600" text-anchor="end">-5.96%</text>
+      <text x="255" y="105" fill="var(--text-muted)" font-size="12">89.41%</text>
+      <text x="240" y="152" fill="var(--text-dim)" font-size="15" text-anchor="end">No gradual unfreezing</text>
+      <rect x="248" y="136" width="282" height="28" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
+      <rect x="430" y="138" width="100" height="24" rx="3" fill="url(#orangeGrad)" opacity="0.8" style="animation: growWidth 1s ease 0.9s both;"/>
+      <text x="425" y="155" fill="var(--accent4)" font-size="14" font-weight="600" text-anchor="end">-4.00%</text>
+      <text x="255" y="155" fill="var(--text-muted)" font-size="12">91.37%</text>
+      <text x="240" y="202" fill="var(--text-dim)" font-size="15" text-anchor="end">No class weights</text>
+      <rect x="248" y="186" width="282" height="28" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
+      <rect x="466" y="188" width="64" height="24" rx="3" fill="url(#orangeGrad)" opacity="0.7" style="animation: growWidth 1s ease 1.05s both;"/>
+      <text x="461" y="205" fill="var(--accent4)" font-size="14" font-weight="600" text-anchor="end">-2.57%</text>
+      <text x="255" y="205" fill="var(--text-muted)" font-size="12">92.80%</text>
+      <text x="240" y="252" fill="var(--text-dim)" font-size="15" text-anchor="end">No label smoothing</text>
+      <rect x="248" y="236" width="282" height="28" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
+      <rect x="494" y="238" width="36" height="24" rx="3" fill="url(#blueGrad)" opacity="0.7" style="animation: growWidth 1s ease 1.2s both;"/>
+      <text x="489" y="255" fill="var(--accent)" font-size="14" font-weight="600" text-anchor="end">-1.42%</text>
+      <text x="255" y="255" fill="var(--text-muted)" font-size="12">93.95%</text>
+      <text x="240" y="305" fill="var(--text)" font-size="15" text-anchor="end" font-weight="600">Full model (final)</text>
+      <rect x="248" y="289" width="282" height="28" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
+      <rect x="248" y="291" width="282" height="24" rx="3" fill="url(#greenGrad)" opacity="0.4" style="animation: growWidth 1s ease 1.35s both;"/>
+      <text x="535" y="308" fill="var(--accent3)" font-size="14" font-weight="700">95.37%</text>
       <defs>
         <linearGradient id="redGrad"><stop offset="0%" stop-color="#dc2626"/><stop offset="100%" stop-color="#f87171"/></linearGradient>
         <linearGradient id="orangeGrad"><stop offset="0%" stop-color="#d97706"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient>
