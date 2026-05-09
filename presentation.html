@@ -10,22 +10,23 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
 
   :root {
-    --bg: #0a0a0a;
-    --surface: #141414;
-    --card: #1a1a1a;
-    --border: rgba(255,255,255,0.08);
-    --accent: #4f8cff;
-    --accent2: #a78bfa;
-    --accent3: #34d399;
-    --accent4: #fbbf24;
-    --danger: #f87171;
-    --text: #f5f5f5;
-    --text-dim: #a1a1aa;
-    --text-muted: #71717a;
+    --bg: #f8fafb;
+    --surface: #ffffff;
+    --card: #f1f5f9;
+    --border: rgba(0,0,0,0.08);
+    --accent: #2563eb;
+    --accent2: #7c3aed;
+    --accent3: #059669;
+    --accent4: #d97706;
+    --danger: #dc2626;
+    --text: #1e293b;
+    --text-dim: #475569;
+    --text-muted: #94a3b8;
   }
 
   body {
     font-family: 'Inter', sans-serif;
+    font-size: 18px;
     background: var(--bg);
     color: var(--text);
     overflow: hidden;
@@ -92,8 +93,8 @@
     to { opacity: 1; transform: translateY(0); }
   }
   @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(79,140,255,0.3); }
-    50% { box-shadow: 0 0 20px 5px rgba(79,140,255,0.15); }
+    0%, 100% { box-shadow: 0 0 0 0 rgba(37,99,235,0.2); }
+    50% { box-shadow: 0 0 20px 5px rgba(37,99,235,0.1); }
   }
   @keyframes drawLine {
     from { stroke-dashoffset: 1000; }
@@ -123,7 +124,7 @@
     letter-spacing: -0.01em;
   }
   h3 {
-    font-size: 1.05em;
+    font-size: 1.15em;
     font-weight: 600;
     margin-bottom: 10px;
   }
@@ -159,12 +160,12 @@
     padding: 24px;
     transition: transform 0.3s, box-shadow 0.3s;
   }
-  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
-  .card.glow-blue { border-color: rgba(79,140,255,0.3); box-shadow: 0 0 30px rgba(79,140,255,0.08); }
-  .card.glow-green { border-color: rgba(52,211,153,0.3); box-shadow: 0 0 30px rgba(52,211,153,0.08); }
-  .card.glow-red { border-color: rgba(248,113,113,0.3); }
+  .card:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(0,0,0,0.08); }
+  .card.glow-blue { border-color: rgba(37,99,235,0.3); box-shadow: 0 0 20px rgba(37,99,235,0.06); }
+  .card.glow-green { border-color: rgba(5,150,105,0.3); box-shadow: 0 0 20px rgba(5,150,105,0.06); }
+  .card.glow-red { border-color: rgba(220,38,38,0.3); }
 
-  .card p, .card li { color: var(--text-dim); font-size: 0.9em; line-height: 1.65; }
+  .card p, .card li { color: var(--text-dim); font-size: 1em; line-height: 1.65; }
   .card ul { list-style: none; padding: 0; }
   .card ul li { padding: 5px 0 5px 20px; position: relative; }
   .card ul li::before { content: '›'; position: absolute; left: 0; color: var(--accent); font-weight: 700; font-size: 1.2em; }
@@ -174,7 +175,7 @@
   .bullets li {
     padding: 10px 0 10px 30px;
     position: relative;
-    font-size: 1.05em;
+    font-size: 1.1em;
     line-height: 1.55;
     color: var(--text-dim);
   }
@@ -189,7 +190,7 @@
   .bullets li strong { color: var(--text); }
 
   /* ===== TABLES ===== */
-  table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.95em; }
   th {
     padding: 10px 14px;
     text-align: left;
@@ -203,7 +204,7 @@
     border-bottom: 1px solid var(--border);
     color: var(--text-dim);
   }
-  tr:hover td { background: rgba(255,255,255,0.02); }
+  tr:hover td { background: rgba(0,0,0,0.02); }
   .good { color: var(--accent3); font-weight: 600; }
   .bad { color: var(--danger); font-weight: 600; }
   .mid { color: var(--accent4); font-weight: 600; }
@@ -227,9 +228,9 @@
   }
   .pipe-step:hover { border-color: var(--accent); transform: translateY(-3px); }
   .pipe-step .pipe-icon { font-size: 1.6em; margin-bottom: 4px; }
-  .pipe-step .pipe-title { font-weight: 600; font-size: 0.8em; }
-  .pipe-step .pipe-sub { font-size: 0.7em; color: var(--text-muted); }
-  .pipe-step.active-step { border-color: var(--accent); background: rgba(79,140,255,0.08); animation: pulse 2s infinite; }
+  .pipe-step .pipe-title { font-weight: 600; font-size: 0.9em; }
+  .pipe-step .pipe-sub { font-size: 0.8em; color: var(--text-muted); }
+  .pipe-step.active-step { border-color: var(--accent); background: rgba(37,99,235,0.06); animation: pulse 2s infinite; }
   .pipe-arrow { color: var(--text-muted); font-size: 1.2em; padding: 0 6px; }
 
   /* ===== STAT ===== */
@@ -245,20 +246,20 @@
     display: inline-block;
     padding: 4px 12px;
     border-radius: 100px;
-    font-size: 0.75em;
+    font-size: 0.85em;
     font-weight: 600;
   }
-  .tag-blue { background: rgba(79,140,255,0.15); color: var(--accent); }
-  .tag-green { background: rgba(52,211,153,0.15); color: var(--accent3); }
-  .tag-purple { background: rgba(167,139,250,0.15); color: var(--accent2); }
-  .tag-yellow { background: rgba(251,191,36,0.15); color: var(--accent4); }
-  .tag-red { background: rgba(248,113,113,0.15); color: var(--danger); }
+  .tag-blue { background: rgba(37,99,235,0.1); color: var(--accent); }
+  .tag-green { background: rgba(5,150,105,0.1); color: var(--accent3); }
+  .tag-purple { background: rgba(124,58,237,0.1); color: var(--accent2); }
+  .tag-yellow { background: rgba(217,119,6,0.1); color: var(--accent4); }
+  .tag-red { background: rgba(220,38,38,0.1); color: var(--danger); }
 
   /* ===== BAR CHART ===== */
   .bar-chart { display: flex; flex-direction: column; gap: 6px; }
   .bar-row { display: flex; align-items: center; gap: 10px; }
-  .bar-label { width: 95px; text-align: right; font-size: 0.78em; color: var(--text-dim); white-space: nowrap; }
-  .bar-track { flex: 1; height: 22px; background: var(--surface); border-radius: 6px; overflow: hidden; position: relative; }
+  .bar-label { width: 105px; text-align: right; font-size: 0.88em; color: var(--text-dim); white-space: nowrap; }
+  .bar-track { flex: 1; height: 22px; background: #e2e8f0; border-radius: 6px; overflow: hidden; position: relative; }
   .bar-fill {
     height: 100%;
     border-radius: 6px;
@@ -266,9 +267,9 @@
     align-items: center;
     justify-content: flex-end;
     padding-right: 8px;
-    font-size: 0.72em;
+    font-size: 0.82em;
     font-weight: 600;
-    color: var(--bg);
+    color: #fff;
     transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
   }
   .slide.active .bar-fill { animation: growWidth 1.2s cubic-bezier(0.4,0,0.2,1) 0.5s both; }
@@ -277,7 +278,7 @@
   .bar-fill.yellow { background: linear-gradient(90deg, #d97706, var(--accent4)); }
   .bar-fill.red { background: linear-gradient(90deg, #dc2626, var(--danger)); }
   .bar-fill.purple { background: linear-gradient(90deg, #7c3aed, var(--accent2)); }
-  .bar-val { font-size: 0.78em; font-weight: 600; min-width: 48px; color: var(--text-dim); }
+  .bar-val { font-size: 0.88em; font-weight: 600; min-width: 48px; color: var(--text-dim); }
 
   /* ===== RUN CARDS ===== */
   .run-card {
@@ -292,11 +293,11 @@
   .run-card:hover { transform: translateY(-4px); }
   .run-card .run-num { font-size: 0.7em; text-transform: uppercase; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 8px; }
   .run-card .run-acc { font-size: 2.6em; font-weight: 800; }
-  .run-card .run-desc { font-size: 0.8em; color: var(--text-dim); margin-top: 10px; line-height: 1.5; }
-  .run-card.final { border-color: var(--accent3); box-shadow: 0 0 40px rgba(52,211,153,0.1); }
+  .run-card .run-desc { font-size: 0.9em; color: var(--text-dim); margin-top: 10px; line-height: 1.5; }
+  .run-card.final { border-color: var(--accent3); box-shadow: 0 0 30px rgba(5,150,105,0.12); }
   .badge {
     position: absolute; top: -10px; right: -10px;
-    background: var(--accent3); color: #000;
+    background: var(--accent3); color: #fff;
     font-size: 0.65em; font-weight: 700;
     padding: 4px 12px; border-radius: 100px;
   }
@@ -312,7 +313,7 @@
     display: flex; align-items: center; justify-content: center;
     font-size: 0.75em; font-weight: 600;
   }
-  .frozen { background: #27272a; color: var(--text-muted); border: 1px solid var(--border); }
+  .frozen { background: #cbd5e1; color: #64748b; border: 1px solid var(--border); }
   .training { background: linear-gradient(90deg, var(--accent), var(--accent2)); color: #fff; }
 
   /* ===== QUOTE ===== */
@@ -336,9 +337,9 @@
     border-left: 3px solid var(--danger);
     transition: all 0.3s;
   }
-  .fail-item:hover { background: #1c1c1c; }
-  .fail-item h4 { font-size: 0.92em; font-weight: 600; margin-bottom: 4px; }
-  .fail-item p { font-size: 0.82em; color: var(--text-dim); line-height: 1.5; }
+  .fail-item:hover { background: #f1f5f9; }
+  .fail-item h4 { font-size: 1.02em; font-weight: 600; margin-bottom: 4px; }
+  .fail-item p { font-size: 0.92em; color: var(--text-dim); line-height: 1.5; }
 
   /* ===== TAKEAWAY ===== */
   .takeaway {
@@ -350,8 +351,8 @@
     min-width: 45px;
     line-height: 1;
   }
-  .takeaway h4 { font-weight: 600; margin-bottom: 4px; font-size: 1.05em; }
-  .takeaway p { color: var(--text-dim); font-size: 0.9em; line-height: 1.5; }
+  .takeaway h4 { font-weight: 600; margin-bottom: 4px; font-size: 1.15em; }
+  .takeaway p { color: var(--text-dim); font-size: 1em; line-height: 1.5; }
 
   /* ===== CHART AREA (SVG) ===== */
   .chart-container {
@@ -387,18 +388,18 @@
   .mini-board {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    width: 220px; height: 220px;
+    width: 320px; height: 320px;
     border-radius: 8px;
     overflow: hidden;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
   }
   .sq {
     display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
+    font-size: 22px;
   }
   .sq.l { background: #e8dcc8; }
   .sq.d { background: #b58863; }
-  .sq .pw { color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
+  .sq .pw { color: #f8fafc; text-shadow: 0 1px 3px rgba(0,0,0,0.6); }
   .sq .pb { color: #1a1a1a; }
 
   /* ===== ABLATION DELTA BARS ===== */
@@ -425,7 +426,7 @@
   code {
     font-family: 'JetBrains Mono', monospace;
     font-size: 0.85em;
-    background: rgba(255,255,255,0.06);
+    background: rgba(0,0,0,0.05);
     padding: 2px 6px;
     border-radius: 4px;
   }
@@ -442,11 +443,11 @@
 <div class="slide center active" id="s1">
   <div class="anim-1" style="font-size:4em; margin-bottom:16px;">♚ ♞ ♜</div>
   <h1 class="anim-2"><span class="gradient-text">Chessboard State Recognition</span><br>from Real-World Images</h1>
-  <p class="anim-3" style="font-size:1.2em; color:var(--text-dim); margin-top:16px;">Project 1 — Square Classification & Board-State Reconstruction</p>
+  <p class="anim-3" style="font-size:1.2em; color:var(--text-dim); margin-top:16px;">Project 1 - Square Classification & Board-State Reconstruction</p>
   <div style="height:50px;"></div>
   <p class="anim-4" style="font-size:1.1em;"><strong>Guy Shick &nbsp;·&nbsp; Tomer Tocker &nbsp;·&nbsp; Jonathan Arbel</strong></p>
   <p class="anim-5" style="color:var(--text-muted); margin-top:6px;">B.Sc. Computer Science &nbsp;|&nbsp; Introduction to Deep Learning, 2025</p>
-  <div class="slide-num">1 / 16</div>
+  <div class="slide-num"></div>
 </div>
 
 <!-- ==================== SLIDE 2: THE PROJECT ==================== -->
@@ -454,265 +455,202 @@
   <h2 class="anim-1">The <span class="gradient-text">Project</span></h2>
   <div class="grid-2">
     <div class="anim-left">
-      <p style="font-size:1.1em; line-height:1.7; color:var(--text-dim); margin-bottom:24px;">
-        <strong style="color:var(--text)">Task:</strong> Given a single image of a real chessboard, classify each of the <strong style="color:var(--accent)">64 squares</strong> into one of <strong style="color:var(--accent)">14 classes</strong> and output the board state as <strong style="color:var(--accent)">FEN notation</strong>.
+      <p style="font-size:1.15em; line-height:1.7; color:var(--text-dim); margin-bottom:24px;">
+        Classify each of <strong style="color:var(--accent)">64 squares</strong> into <strong style="color:var(--accent)">14 classes</strong> from a single real chessboard image
       </p>
       <div class="grid-4" style="gap:10px;">
         <div class="card" style="padding:14px; text-align:center;">
           <div style="font-size:1.4em;">♙♘♗</div>
-          <div style="font-size:0.75em; color:var(--text-dim);">6 White Pieces</div>
+          <div style="font-size:0.8em; color:var(--text-dim);">6 White</div>
         </div>
         <div class="card" style="padding:14px; text-align:center;">
           <div style="font-size:1.4em;">♟♞♝</div>
-          <div style="font-size:0.75em; color:var(--text-dim);">6 Black Pieces</div>
+          <div style="font-size:0.8em; color:var(--text-dim);">6 Black</div>
         </div>
         <div class="card" style="padding:14px; text-align:center;">
           <div style="font-size:1.4em;">☐</div>
-          <div style="font-size:0.75em; color:var(--text-dim);">Empty</div>
+          <div style="font-size:0.8em; color:var(--text-dim);">Empty</div>
         </div>
         <div class="card" style="padding:14px; text-align:center;">
           <div style="font-size:1.4em; color:var(--danger);">✕</div>
-          <div style="font-size:0.75em; color:var(--text-dim);">Occluded</div>
+          <div style="font-size:0.8em; color:var(--text-dim);">Occluded</div>
         </div>
       </div>
       <div class="spacer"></div>
       <h3 style="color:var(--accent4);">Challenges</h3>
       <ul class="bullets">
-        <li><strong>Varying lighting</strong> — different rooms, times</li>
-        <li><strong>Camera angles</strong> — perspective distortion</li>
-        <li><strong>Occlusions</strong> — hands moving pieces</li>
-        <li><strong>Similar pieces</strong> — queen vs rook vs bishop from above</li>
+        <li><strong>Varying lighting</strong> and camera angles</li>
+        <li><strong>Occlusions</strong> - hands moving pieces</li>
+        <li><strong>Similar pieces</strong> - queen vs rook vs bishop</li>
       </ul>
     </div>
-    <div class="anim-right center">
+    <div class="anim-right center" style="padding-left:40px;">
       <div class="mini-board" id="boardDemo"></div>
-      <div class="spacer"></div>
-      <div style="font-family:'JetBrains Mono',monospace; font-size:0.8em; color:var(--text-muted);">
-        rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR
-      </div>
     </div>
   </div>
-  <div class="slide-num">2 / 16</div>
+  <div class="slide-num"></div>
 </div>
 
 <!-- ==================== SLIDE 3: PIPELINE ==================== -->
 <div class="slide v-center" id="s3">
   <h2 class="anim-1">End-to-End <span class="gradient-text">Pipeline</span></h2>
-  <div class="pipeline anim-2" style="margin:30px 0;">
-    <div class="pipe-step"><div class="pipe-icon">📷</div><div class="pipe-title">Raw Image</div><div class="pipe-sub">Input photo</div></div>
+  <div class="pipeline anim-2" style="margin:40px 0;">
+    <div class="pipe-step"><div class="pipe-icon">📷</div><div class="pipe-title">Raw Image</div></div>
     <div class="pipe-arrow">→</div>
-    <div class="pipe-step"><div class="pipe-icon">🔲</div><div class="pipe-title">Detect Board</div><div class="pipe-sub">OpenCV corners</div></div>
+    <div class="pipe-step"><div class="pipe-icon">🔲</div><div class="pipe-title">Board Detection</div><div class="pipe-sub">OpenCV</div></div>
     <div class="pipe-arrow">→</div>
-    <div class="pipe-step"><div class="pipe-icon">📐</div><div class="pipe-title">Perspective Warp</div><div class="pipe-sub">512×512 top-down</div></div>
+    <div class="pipe-step"><div class="pipe-icon">📐</div><div class="pipe-title">Perspective Warp</div><div class="pipe-sub">512×512</div></div>
     <div class="pipe-arrow">→</div>
-    <div class="pipe-step"><div class="pipe-icon">🔳</div><div class="pipe-title">Extract Squares</div><div class="pipe-sub">64 × 224×224</div></div>
+    <div class="pipe-step"><div class="pipe-icon">🔳</div><div class="pipe-title">64 Squares</div><div class="pipe-sub">224×224 each</div></div>
     <div class="pipe-arrow">→</div>
-    <div class="pipe-step active-step"><div class="pipe-icon">🧠</div><div class="pipe-title">EfficientNet-B2</div><div class="pipe-sub">14-class classifier</div></div>
+    <div class="pipe-step active-step"><div class="pipe-icon">🧠</div><div class="pipe-title">EfficientNet-B2</div><div class="pipe-sub">14-class</div></div>
     <div class="pipe-arrow">→</div>
-    <div class="pipe-step"><div class="pipe-icon">♚</div><div class="pipe-title">Post-Process</div><div class="pipe-sub">Chess rules + OOD</div></div>
+    <div class="pipe-step"><div class="pipe-icon">♚</div><div class="pipe-title">Chess Rules</div><div class="pipe-sub">Post-process</div></div>
     <div class="pipe-arrow">→</div>
-    <div class="pipe-step"><div class="pipe-icon">📋</div><div class="pipe-title">FEN Output</div><div class="pipe-sub">Board diagram</div></div>
+    <div class="pipe-step"><div class="pipe-icon">📋</div><div class="pipe-title">FEN</div></div>
   </div>
   <div class="grid-3 anim-3">
     <div class="card">
       <h3 style="color:var(--accent);">Board Detection</h3>
-      <ul>
-        <li><code>findChessboardCorners</code> on 7×7 grid</li>
-        <li>Contour-based fallback</li>
-        <li>Sub-pixel corner refinement</li>
-      </ul>
+      <p>OpenCV <code>findChessboardCorners</code> with contour-based fallback</p>
     </div>
     <div class="card glow-blue">
-      <h3 style="color:var(--accent);">Square Extraction</h3>
-      <ul>
-        <li><strong>70% overlap padding</strong> — each square sees its neighbors</li>
-        <li>Provides crucial context for piece identification</li>
-      </ul>
+      <h3 style="color:var(--accent);">70% Overlap Padding</h3>
+      <p>Each square sees its neighbors - crucial context for identifying pieces</p>
     </div>
     <div class="card">
-      <h3 style="color:var(--accent);">Post-Processing</h3>
-      <ul>
-        <li>No pawns on ranks 1 & 8</li>
-        <li>Exactly one king per side</li>
-        <li>Enforce piece count limits</li>
-      </ul>
+      <h3 style="color:var(--accent);">Chess Rules</h3>
+      <p>No pawns on rank 1/8, one king per side, piece count limits</p>
     </div>
   </div>
-  <div class="slide-num">3 / 16</div>
+  <div class="slide-num"></div>
 </div>
 
-<!-- ==================== SLIDE 4: OVERCOMING THE MAIN CHALLENGE ==================== -->
-<div class="slide" id="s4">
+<!-- ==================== SLIDE 4: OVERCOMING MAIN CHALLENGE ==================== -->
+<div class="slide v-center" id="s4">
   <h2 class="anim-1">Overcoming the <span class="gradient-warm">Main Challenge</span></h2>
-  <div class="quote anim-2">"Our biggest challenge wasn't the model — it was preventing data leakage and building a representative validation set."</div>
-  <div class="grid-2 anim-3">
+  <div class="grid-2 anim-2">
     <div class="card glow-red">
-      <h3 style="color:var(--danger);">❌ The Problem (Run 1)</h3>
+      <h3 style="color:var(--danger);">Problem: Data Leakage</h3>
       <ul>
-        <li><strong>Game-level split</strong>: last 2 games → validation</li>
-        <li>Only <strong>200 val samples</strong> from 2 games</li>
-        <li>Augmented variants could leak across splits</li>
-        <li style="color:var(--danger);">Result: <strong>23-point overfit gap</strong></li>
+        <li>Game-level split: only 200 val samples from 2 games</li>
+        <li>Augmented variants leaked across splits</li>
+        <li style="color:var(--danger);"><strong>23-point overfit gap</strong> (95% train vs 72% val)</li>
       </ul>
     </div>
     <div class="card glow-green">
-      <h3 style="color:var(--accent3);">✓ The Solution (Run 2+)</h3>
+      <h3 style="color:var(--accent3);">Solution: Frame-Group Split</h3>
       <ul>
-        <li><strong>Frame-group split</strong>: group by (game_id, frame)</li>
-        <li>All augmented variants stay together → <strong>no leakage</strong></li>
-        <li><strong>595 val samples</strong> from 9 games</li>
-        <li style="color:var(--accent3);">Result: <strong>val ≥ train</strong> (no overfitting)</li>
+        <li>Group by (game_id, frame) - all variants stay together</li>
+        <li>595 val samples from 9 games</li>
+        <li style="color:var(--accent3);"><strong>No overfitting</strong> - val ≥ train</li>
       </ul>
     </div>
   </div>
-  <div class="slide-num">4 / 16</div>
+  <div class="slide-num"></div>
 </div>
 
 <!-- ==================== SLIDE 5: ROBUSTNESS ==================== -->
-<div class="slide" id="s5">
-  <h2 class="anim-1"><span class="gradient-text">Robustness</span> & Augmentation</h2>
-  <div class="grid-2">
-    <div class="anim-left">
-      <div class="card" style="margin-bottom:16px;">
-        <h3 style="color:var(--accent4);">Offline Augmentation <span class="tag tag-yellow">×5 data</span></h3>
-        <p style="margin-bottom:12px;">Pre-generated variants simulating real-world conditions:</p>
-        <table>
-          <tr><td>☀️ <strong>Bright</strong></td><td>Well-lit environments, window glare</td></tr>
-          <tr><td>🌙 <strong>Dark</strong></td><td>Dim lighting, shadows</td></tr>
-          <tr><td>🎨 <strong>Color</strong></td><td>Different camera white balance</td></tr>
-          <tr><td>📡 <strong>Noisy</strong></td><td>Low-quality sensor noise</td></tr>
-        </table>
-      </div>
+<div class="slide v-center" id="s5">
+  <h2 class="anim-1"><span class="gradient-text">Robustness</span></h2>
+  <div class="grid-2 anim-2">
+    <div class="card">
+      <h3 style="color:var(--accent4);">Offline Augmentation <span class="tag tag-yellow">x5 data</span></h3>
+      <p>4 pre-generated variants per game:</p>
+      <table style="margin-top:10px;">
+        <tr><td>☀️ <strong>Bright</strong></td><td>🌙 <strong>Dark</strong></td></tr>
+        <tr><td>🎨 <strong>Color-shifted</strong></td><td>📡 <strong>Noisy</strong></td></tr>
+      </table>
     </div>
-    <div class="anim-right">
-      <div class="card">
-        <h3 style="color:var(--accent2);">Online Augmentation <span class="tag tag-purple">per square</span></h3>
-        <p style="margin-bottom:12px;">Applied during training only, kept mild:</p>
-        <table>
-          <tr><td><strong>ColorJitter</strong></td><td>±10% brightness/contrast</td></tr>
-          <tr><td><strong>RandomAffine</strong></td><td>±5° rotation, 3% translate</td></tr>
-          <tr><td><strong>RandomGrayscale</strong></td><td>10% probability</td></tr>
-          <tr><td><strong>GaussianBlur</strong></td><td>20% probability</td></tr>
-          <tr><td><strong>RandomErasing</strong></td><td>25% — simulates occlusions</td></tr>
-        </table>
-        <p style="margin-top:10px;"><em style="color:var(--accent3);">Kept mild to avoid overlap with offline variants</em></p>
-      </div>
+    <div class="card">
+      <h3 style="color:var(--accent2);">Online Augmentation <span class="tag tag-purple">per square</span></h3>
+      <p>Mild transforms during training:</p>
+      <p style="margin-top:8px;">ColorJitter, ±5° rotation, GaussianBlur, RandomErasing (simulates occlusions)</p>
     </div>
   </div>
-  <div class="slide-num">5 / 16</div>
+  <div class="slide-num"></div>
 </div>
 
 <!-- ==================== SLIDE 6: THE MODEL ==================== -->
-<div class="slide" id="s6">
+<div class="slide v-center" id="s6">
   <h2 class="anim-1">The <span class="gradient-text">Model</span></h2>
-  <!-- Architecture flow -->
-  <div style="display:flex; align-items:center; justify-content:center; gap:0; margin:20px 0; flex-wrap:wrap;" class="anim-2">
+  <div style="display:flex; align-items:center; justify-content:center; gap:0; margin:30px 0; flex-wrap:wrap;" class="anim-2">
     <div class="pipe-step"><div class="pipe-title">Input Square</div><div class="pipe-sub">224 × 224 × 3</div></div>
     <div class="pipe-arrow">→</div>
-    <div class="pipe-step active-step" style="min-width:160px;">
-      <div class="pipe-title" style="font-size:0.95em;">EfficientNet-B2</div>
-      <div class="pipe-sub">Pretrained ImageNet · 1,408 features</div>
+    <div class="pipe-step active-step" style="min-width:180px;">
+      <div class="pipe-title" style="font-size:1em;">EfficientNet-B2</div>
+      <div class="pipe-sub">Pretrained ImageNet</div>
     </div>
     <div class="pipe-arrow">→</div>
-    <div class="pipe-step"><div class="pipe-title">Dropout</div><div class="pipe-sub">p = 0.3</div></div>
+    <div class="pipe-step"><div class="pipe-title">Dropout(0.3)</div></div>
     <div class="pipe-arrow">→</div>
-    <div class="pipe-step"><div class="pipe-title">Linear Head</div><div class="pipe-sub">1,408 → 14 classes</div></div>
+    <div class="pipe-step"><div class="pipe-title">Linear</div><div class="pipe-sub">1,408 → 14</div></div>
   </div>
   <div class="grid-3 anim-3">
     <div class="card glow-blue">
-      <h3 style="color:var(--accent);">Why EfficientNet-B2?</h3>
-      <ul>
-        <li>Compound scaling optimizes depth, width & resolution together</li>
-        <li>Best accuracy-to-parameter ratio for our data size</li>
-        <li>Outperformed ResNet18 by <strong>+5.96%</strong></li>
-        <li>Outperformed larger models (Swin, ResNet50) which overfit</li>
-      </ul>
+      <h3 style="color:var(--accent);">EfficientNet-B2</h3>
+      <p>Best accuracy-to-parameter ratio for our data size. Outperformed ResNet18 (+5.96%) and larger models that overfit.</p>
     </div>
     <div class="card">
-      <h3 style="color:var(--accent2);">Loss Function</h3>
-      <ul>
-        <li><strong>CrossEntropy</strong> with label smoothing (α=0.1)</li>
-        <li><strong>Inverse-frequency class weights</strong></li>
-        <li>Rare pieces (queens, kings) weighted higher</li>
-        <li>Smoothing prevents overconfident predictions</li>
-      </ul>
+      <h3 style="color:var(--accent2);">CrossEntropy Loss</h3>
+      <p>Label smoothing (0.1) + inverse-frequency class weights for rare pieces</p>
     </div>
     <div class="card">
-      <h3 style="color:var(--accent3);">Training Config</h3>
-      <ul>
-        <li><strong>AdamW</strong> optimizer, weight decay 1e-3</li>
-        <li><strong>ReduceLROnPlateau</strong> (patience=3)</li>
-        <li><strong>Gradient clipping</strong> (max_norm=1.0)</li>
-        <li><strong>WeightedRandomSampler</strong> for class balance</li>
-      </ul>
+      <h3 style="color:var(--accent3);">Occlusion Handling</h3>
+      <p>Supervised occlusion class (13) + confidence thresholding + temperature scaling</p>
     </div>
   </div>
-  <div class="slide-num">6 / 16</div>
+  <div class="slide-num"></div>
 </div>
 
-<!-- ==================== SLIDE 7: WHAT'S SPECIAL - GRADUAL UNFREEZING ==================== -->
-<div class="slide" id="s7">
+<!-- ==================== SLIDE 7: WHAT'S SPECIAL ==================== -->
+<div class="slide v-center" id="s7">
   <h2 class="anim-1">What's <span class="gradient-green">Special</span>: Gradual Unfreezing</h2>
   <div class="grid-2">
     <div class="anim-left">
       <div class="card" style="margin-bottom:16px;">
-        <h3>Phase 1 — Epochs 1–3 <span class="tag tag-blue">LR = 5e-5</span></h3>
+        <h3>Phase 1 - Epochs 1-3</h3>
         <div style="margin:14px 0;">
           <div class="freeze-row">
             <span class="freeze-label">Backbone (60%)</span>
-            <div class="freeze-bar frozen" style="flex:0.6;">🔒 FROZEN</div>
+            <div class="freeze-bar frozen" style="flex:0.6;">FROZEN</div>
           </div>
           <div class="freeze-row">
-            <span class="freeze-label">Backbone (40%)</span>
-            <div class="freeze-bar training" style="flex:0.4;">TRAINING</div>
-          </div>
-          <div class="freeze-row">
-            <span class="freeze-label">Classifier Head</span>
+            <span class="freeze-label">Upper + Head</span>
             <div class="freeze-bar training" style="flex:0.4;">TRAINING</div>
           </div>
         </div>
-        <p>Head learns chess-specific features on <em>stable</em> backbone representations</p>
       </div>
       <div class="card">
-        <h3>Phase 2 — Epochs 4–30 <span class="tag tag-green">LR = 2.5e-5</span></h3>
+        <h3>Phase 2 - Epochs 4-30</h3>
         <div style="margin:14px 0;">
           <div class="freeze-row">
-            <span class="freeze-label">Full Backbone</span>
-            <div class="freeze-bar training" style="flex:1;">✓ ALL TRAINING</div>
-          </div>
-          <div class="freeze-row">
-            <span class="freeze-label">Classifier Head</span>
-            <div class="freeze-bar training" style="flex:1;">✓ ALL TRAINING</div>
+            <span class="freeze-label">Everything</span>
+            <div class="freeze-bar training" style="flex:1;">ALL TRAINING (halved LR)</div>
           </div>
         </div>
-        <p>Full fine-tuning with halved LR — backbone adapts gradually to chess domain</p>
       </div>
     </div>
     <div class="anim-right">
       <div class="card glow-green" style="margin-bottom:16px;">
         <h3 style="color:var(--accent3);">Why It Works</h3>
-        <ul>
-          <li><strong>Prevents catastrophic forgetting</strong> of ImageNet features</li>
-          <li>Head stabilizes before backbone changes</li>
-          <li>Halved LR prevents rapid weight changes</li>
-          <li style="color:var(--accent3); font-weight:600;">Result: +4.00% over fully frozen backbone</li>
-        </ul>
+        <p>Prevents catastrophic forgetting. Head stabilizes on stable features first, then full fine-tuning adapts the backbone.</p>
       </div>
       <div class="card">
-        <h3>Impact Comparison</h3>
+        <h3>Impact</h3>
         <div style="margin-top:12px;">
           <div class="bar-row" style="margin-bottom:10px;">
-            <span style="font-size:0.82em; width:130px; text-align:right; color:var(--text-dim);">Fully unfrozen</span>
+            <span style="font-size:0.88em; width:140px; text-align:right; color:var(--text-dim);">Fully unfrozen</span>
             <div class="bar-track"><div class="bar-fill red" style="width:72.5%;"></div></div>
             <span class="bar-val bad">72.5%</span>
           </div>
           <div class="bar-row" style="margin-bottom:10px;">
-            <span style="font-size:0.82em; width:130px; text-align:right; color:var(--text-dim);">60% frozen (all)</span>
+            <span style="font-size:0.88em; width:140px; text-align:right; color:var(--text-dim);">60% frozen (all)</span>
             <div class="bar-track"><div class="bar-fill yellow" style="width:91.4%;"></div></div>
             <span class="bar-val mid">91.4%</span>
           </div>
           <div class="bar-row">
-            <span style="font-size:0.82em; width:130px; text-align:right; color:var(--text-dim);">Gradual unfreezing</span>
+            <span style="font-size:0.88em; width:140px; text-align:right; color:var(--text-dim);">Gradual unfreezing</span>
             <div class="bar-track"><div class="bar-fill green" style="width:95.4%;"></div></div>
             <span class="bar-val good">95.4%</span>
           </div>
@@ -720,202 +658,11 @@
       </div>
     </div>
   </div>
-  <div class="slide-num">7 / 16</div>
+  <div class="slide-num"></div>
 </div>
 
-<!-- ==================== SLIDE 8: HANDLING OCCLUSIONS ==================== -->
+<!-- ==================== SLIDE 8: QUANTITATIVE RESULTS ==================== -->
 <div class="slide" id="s8">
-  <h2 class="anim-1">Handling <span class="gradient-warm">Occlusions</span> & OOD</h2>
-  <div class="grid-2">
-    <div class="anim-left">
-      <div class="card" style="margin-bottom:16px;">
-        <h3>Hybrid 3-Layer Approach</h3>
-        <div style="margin:14px 0;">
-          <div style="display:flex; align-items:flex-start; gap:14px; margin-bottom:16px;">
-            <span class="tag tag-blue" style="min-width:24px; text-align:center;">1</span>
-            <div>
-              <strong>Supervised Occlusion Class</strong>
-              <p style="font-size:0.82em;">Class 13 explicitly trained with manually annotated occluded squares</p>
-            </div>
-          </div>
-          <div style="display:flex; align-items:flex-start; gap:14px; margin-bottom:16px;">
-            <span class="tag tag-purple" style="min-width:24px; text-align:center;">2</span>
-            <div>
-              <strong>Confidence Thresholding</strong>
-              <p style="font-size:0.82em;">Predictions below threshold → marked as unknown</p>
-            </div>
-          </div>
-          <div style="display:flex; align-items:flex-start; gap:14px;">
-            <span class="tag tag-green" style="min-width:24px; text-align:center;">3</span>
-            <div>
-              <strong>Temperature Scaling</strong>
-              <p style="font-size:0.82em;">T = 1.24 calibrates model confidence for reliable OOD detection</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="anim-right">
-      <div class="card" style="margin-bottom:16px;">
-        <h3 style="color:var(--accent4);">Annotation Pipeline</h3>
-        <ul>
-          <li>Custom interactive tool (<code>tag_occlusions.py</code>)</li>
-          <li>Manual tagging per frame — mark blocked squares</li>
-          <li>Auto-propagation to all 4 augmented variants</li>
-          <li>Model learns what occlusion <em>looks like</em></li>
-        </ul>
-      </div>
-      <div class="card">
-        <h3 style="color:var(--accent);">Chess Rules Enforcement</h3>
-        <ul>
-          <li>No pawns on first/last rank</li>
-          <li>Exactly 1 king per side (keep highest confidence)</li>
-          <li>Max piece counts (8 pawns, 2 rooks, etc.)</li>
-          <li>Violations → use 2nd-best prediction</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-  <div class="slide-num">8 / 16</div>
-</div>
-
-<!-- ==================== SLIDE 9: TRAINING EVOLUTION ==================== -->
-<div class="slide v-center" id="s9">
-  <h2 class="anim-1">Training <span class="gradient-text">Evolution</span></h2>
-  <div class="grid-4 anim-2" style="margin-bottom:24px;">
-    <div class="run-card">
-      <div class="run-num">Run 1</div>
-      <div class="run-acc bad">72.5%</div>
-      <div class="run-desc">Full fine-tune · Game-level split</div>
-      <div style="margin-top:8px;"><span class="tag tag-red">Severe overfitting</span></div>
-    </div>
-    <div class="run-card">
-      <div class="run-num">Run 2</div>
-      <div class="run-acc mid">91.4%</div>
-      <div class="run-desc">60% frozen · Frame-group split</div>
-      <div style="margin-top:8px;"><span class="tag tag-yellow">+18.9%</span></div>
-    </div>
-    <div class="run-card">
-      <div class="run-num">Run 3</div>
-      <div class="run-acc" style="color:var(--accent);">95.0%</div>
-      <div class="run-desc">Gradual unfreezing · Reduced aug</div>
-      <div style="margin-top:8px;"><span class="tag tag-blue">+3.6%</span></div>
-    </div>
-    <div class="run-card final">
-      <div class="badge">FINAL</div>
-      <div class="run-num">Run 4</div>
-      <div class="run-acc good">95.4%</div>
-      <div class="run-desc">30 epochs · Same strategy</div>
-      <div style="margin-top:8px;"><span class="tag tag-green">Best model</span></div>
-    </div>
-  </div>
-
-  <!-- Training curve chart -->
-  <div class="chart-container anim-3">
-    <div class="chart-title">Validation Accuracy Over Epochs (Run 3 — Gradual Unfreezing)</div>
-    <svg viewBox="0 0 700 200" style="height:200px;">
-      <!-- Grid lines -->
-      <line x1="50" y1="10" x2="50" y2="180" stroke="#333" stroke-width="1"/>
-      <line x1="50" y1="180" x2="680" y2="180" stroke="#333" stroke-width="1"/>
-      <line x1="50" y1="130" x2="680" y2="130" stroke="#222" stroke-width="0.5" stroke-dasharray="4"/>
-      <line x1="50" y1="80" x2="680" y2="80" stroke="#222" stroke-width="0.5" stroke-dasharray="4"/>
-      <line x1="50" y1="30" x2="680" y2="30" stroke="#222" stroke-width="0.5" stroke-dasharray="4"/>
-      <!-- Y labels -->
-      <text x="45" y="184" fill="#666" font-size="10" text-anchor="end">70%</text>
-      <text x="45" y="134" fill="#666" font-size="10" text-anchor="end">80%</text>
-      <text x="45" y="84" fill="#666" font-size="10" text-anchor="end">90%</text>
-      <text x="45" y="34" fill="#666" font-size="10" text-anchor="end">100%</text>
-      <!-- X labels -->
-      <text x="50" y="195" fill="#666" font-size="9" text-anchor="middle">1</text>
-      <text x="176" y="195" fill="#666" font-size="9" text-anchor="middle">5</text>
-      <text x="302" y="195" fill="#666" font-size="9" text-anchor="middle">10</text>
-      <text x="428" y="195" fill="#666" font-size="9" text-anchor="middle">15</text>
-      <text x="554" y="195" fill="#666" font-size="9" text-anchor="middle">20</text>
-      <text x="680" y="195" fill="#666" font-size="9" text-anchor="middle">25</text>
-      <!-- Unfreezing marker -->
-      <line x1="126" y1="10" x2="126" y2="180" stroke="var(--accent4)" stroke-width="1" stroke-dasharray="5,3" opacity="0.6"/>
-      <text x="130" y="20" fill="var(--accent4)" font-size="8">Unfreeze all</text>
-      <!-- Val accuracy line - Run 3 data points -->
-      <polyline fill="none" stroke="var(--accent3)" stroke-width="2.5"
-        points="
-          50,178
-          76,160
-          101,148
-          126,137
-          151,121
-          176,107
-          201,100
-          227,94
-          252,90
-          277,87
-          302,78
-          327,77
-          353,76
-          378,73
-          403,69
-          428,64
-          453,59
-          479,62
-          504,58
-          529,57
-          554,60
-          579,57
-          604,58
-          630,52
-          655,48
-        "
-        stroke-dasharray="1000"
-        stroke-dashoffset="1000"
-        style="animation: drawLine 2s ease 0.8s forwards;"
-      />
-      <!-- Train accuracy line -->
-      <polyline fill="none" stroke="var(--accent)" stroke-width="2" opacity="0.5"
-        points="
-          50,181
-          76,152
-          101,141
-          126,130
-          151,117
-          176,109
-          201,102
-          227,96
-          252,91
-          277,88
-          302,84
-          327,76
-          353,75
-          378,73
-          403,69
-          428,67
-          453,64
-          479,61
-          504,59
-          529,54
-          554,53
-          579,55
-          604,54
-          630,52
-          655,50
-        "
-        stroke-dasharray="1000"
-        stroke-dashoffset="1000"
-        style="animation: drawLine 2s ease 1s forwards;"
-      />
-      <!-- Final point marker -->
-      <circle cx="655" cy="48" r="5" fill="var(--accent3)" opacity="0" style="animation: fadeIn 0.5s ease 2.5s forwards;"/>
-      <text x="662" y="44" fill="var(--accent3)" font-size="10" font-weight="600" opacity="0" style="animation: fadeIn 0.5s ease 2.5s forwards;">94.97%</text>
-    </svg>
-    <div class="chart-legend">
-      <div class="legend-item"><div class="legend-dot" style="background:var(--accent3);"></div> Validation Accuracy</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--accent); opacity:0.5;"></div> Training Accuracy</div>
-      <div class="legend-item"><div class="legend-dot" style="background:var(--accent4);"></div> Unfreeze Point (Epoch 4)</div>
-    </div>
-  </div>
-  <div class="slide-num">9 / 16</div>
-</div>
-
-<!-- ==================== SLIDE 10: QUANTITATIVE RESULTS ==================== -->
-<div class="slide" id="s10">
   <h2 class="anim-1"><span class="gradient-green">Quantitative</span> Results</h2>
   <div class="grid-2">
     <div class="anim-left">
@@ -928,102 +675,137 @@
         <div class="bar-row"><span class="bar-label">White Rook</span><div class="bar-track"><div class="bar-fill green" style="width:96.9%;">96.9%</div></div></div>
         <div class="bar-row"><span class="bar-label">Black Bishop</span><div class="bar-track"><div class="bar-fill green" style="width:96.1%;">96.1%</div></div></div>
         <div class="bar-row"><span class="bar-label">Empty</span><div class="bar-track"><div class="bar-fill blue" style="width:95.7%;">95.7%</div></div></div>
-        <div class="bar-row"><span class="bar-label">White Pawn</span><div class="bar-track"><div class="bar-fill blue" style="width:95.4%;">95.4%</div></div></div>
-        <div class="bar-row"><span class="bar-label">Black Pawn</span><div class="bar-track"><div class="bar-fill blue" style="width:95.1%;">95.1%</div></div></div>
-        <div class="bar-row"><span class="bar-label">Black King</span><div class="bar-track"><div class="bar-fill blue" style="width:94.5%;">94.5%</div></div></div>
-        <div class="bar-row"><span class="bar-label">White King</span><div class="bar-track"><div class="bar-fill blue" style="width:94.7%;">94.7%</div></div></div>
-        <div class="bar-row"><span class="bar-label">White Bishop</span><div class="bar-track"><div class="bar-fill yellow" style="width:93.7%;">93.7%</div></div></div>
-        <div class="bar-row"><span class="bar-label">White Knight</span><div class="bar-track"><div class="bar-fill yellow" style="width:93.4%;">93.4%</div></div></div>
-        <div class="bar-row"><span class="bar-label">Black Knight</span><div class="bar-track"><div class="bar-fill yellow" style="width:93.0%;">93.0%</div></div></div>
-        <div class="bar-row"><span class="bar-label">Black Queen</span><div class="bar-track"><div class="bar-fill yellow" style="width:92.8%;">92.8%</div></div></div>
-        <div class="bar-row"><span class="bar-label">White Queen</span><div class="bar-track"><div class="bar-fill red" style="width:89.6%;">89.6%</div></div></div>
+        <div class="bar-row"><span class="bar-label">Pawns</span><div class="bar-track"><div class="bar-fill blue" style="width:95.3%;">~95%</div></div></div>
+        <div class="bar-row"><span class="bar-label">Kings</span><div class="bar-track"><div class="bar-fill blue" style="width:94.6%;">~94.5%</div></div></div>
+        <div class="bar-row"><span class="bar-label">Knights</span><div class="bar-track"><div class="bar-fill yellow" style="width:93.2%;">~93%</div></div></div>
+        <div class="bar-row"><span class="bar-label">Bishops</span><div class="bar-track"><div class="bar-fill yellow" style="width:93.7%;">~94%</div></div></div>
+        <div class="bar-row"><span class="bar-label">Queens</span><div class="bar-track"><div class="bar-fill red" style="width:91.2%;">~91%</div></div></div>
         <div class="bar-row"><span class="bar-label">Occluded</span><div class="bar-track"><div class="bar-fill red" style="width:87.1%;">87.1%</div></div></div>
       </div>
     </div>
     <div class="anim-right">
       <div class="card glow-green" style="margin-bottom:16px;">
-        <h3 style="color:var(--accent3);">💪 Strengths</h3>
+        <h3 style="color:var(--accent3);">Strengths</h3>
         <ul>
-          <li><strong>Rooks</strong> (96–99%): highly distinctive castle shape</li>
-          <li><strong>Pawns</strong> (95%+): abundant training data, consistent shape</li>
-          <li><strong>Empty</strong> (95.7%): easy to distinguish from pieces</li>
-          <li><strong>No overfitting</strong>: val ≥ train throughout</li>
+          <li><strong>Rooks</strong> (96-99%): distinctive castle shape</li>
+          <li><strong>Pawns</strong> (95%+): abundant, consistent shape</li>
+          <li>Overfit gap: <strong>-0.62%</strong> (val > train)</li>
         </ul>
       </div>
-      <div class="card glow-red" style="margin-bottom:16px;">
-        <h3 style="color:var(--danger);">⚠ Weaknesses</h3>
+      <div class="card glow-red">
+        <h3 style="color:var(--danger);">Weaknesses</h3>
         <ul>
-          <li><strong>Queens (89–93%)</strong>: confused with rooks & bishops — similar tall silhouettes from overhead</li>
-          <li><strong>Occluded (87%)</strong>: inherently ambiguous — limited visual information by definition</li>
+          <li><strong>Queens</strong> (~91%): confused with rooks/bishops</li>
+          <li><strong>Occluded</strong> (87%): inherently ambiguous</li>
         </ul>
-      </div>
-      <div class="card">
-        <h3>Key Metrics</h3>
-        <table>
-          <tr><td>Training Accuracy</td><td><strong>94.74%</strong></td></tr>
-          <tr><td>Overfit Gap</td><td><strong style="color:var(--accent3);">-0.62%</strong></td></tr>
-          <tr><td>Temperature (T)</td><td><strong>1.2444</strong></td></tr>
-          <tr><td>Total Squares Evaluated</td><td><strong>38,080</strong></td></tr>
-        </table>
       </div>
     </div>
   </div>
-  <div class="slide-num">10 / 16</div>
+  <div class="slide-num"></div>
 </div>
 
-<!-- ==================== SLIDE 11: ABLATION STUDY ==================== -->
-<div class="slide v-center" id="s11">
+<!-- ==================== SLIDE 9: TRAINING EVOLUTION ==================== -->
+<div class="slide v-center" id="s9">
+  <h2 class="anim-1">Training <span class="gradient-text">Evolution</span></h2>
+  <div class="grid-4 anim-2" style="margin-bottom:24px;">
+    <div class="run-card">
+      <div class="run-num">Run 1</div>
+      <div class="run-acc bad">72.5%</div>
+      <div class="run-desc">Full fine-tune<br>Game-level split</div>
+      <div style="margin-top:8px;"><span class="tag tag-red">Overfitting</span></div>
+    </div>
+    <div class="run-card">
+      <div class="run-num">Run 2</div>
+      <div class="run-acc mid">91.4%</div>
+      <div class="run-desc">60% frozen<br>Frame-group split</div>
+      <div style="margin-top:8px;"><span class="tag tag-yellow">+18.9%</span></div>
+    </div>
+    <div class="run-card">
+      <div class="run-num">Run 3</div>
+      <div class="run-acc" style="color:var(--accent);">95.0%</div>
+      <div class="run-desc">Gradual unfreezing<br>Reduced augmentation</div>
+      <div style="margin-top:8px;"><span class="tag tag-blue">+3.6%</span></div>
+    </div>
+    <div class="run-card final">
+      <div class="badge">FINAL</div>
+      <div class="run-num">Run 4</div>
+      <div class="run-acc good">95.4%</div>
+      <div class="run-desc">Extended training<br>30 epochs</div>
+      <div style="margin-top:8px;"><span class="tag tag-green">Best</span></div>
+    </div>
+  </div>
+  <div class="chart-container anim-3">
+    <div class="chart-title">Validation Accuracy - Run 3</div>
+    <svg viewBox="0 0 700 200" style="height:200px;">
+      <line x1="50" y1="10" x2="50" y2="180" stroke="#cbd5e1" stroke-width="1"/>
+      <line x1="50" y1="180" x2="680" y2="180" stroke="#cbd5e1" stroke-width="1"/>
+      <line x1="50" y1="130" x2="680" y2="130" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="4"/>
+      <line x1="50" y1="80" x2="680" y2="80" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="4"/>
+      <line x1="50" y1="30" x2="680" y2="30" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="4"/>
+      <text x="45" y="184" fill="#64748b" font-size="10" text-anchor="end">70%</text>
+      <text x="45" y="134" fill="#64748b" font-size="10" text-anchor="end">80%</text>
+      <text x="45" y="84" fill="#64748b" font-size="10" text-anchor="end">90%</text>
+      <text x="45" y="34" fill="#64748b" font-size="10" text-anchor="end">100%</text>
+      <text x="50" y="195" fill="#64748b" font-size="9" text-anchor="middle">1</text>
+      <text x="302" y="195" fill="#64748b" font-size="9" text-anchor="middle">10</text>
+      <text x="554" y="195" fill="#64748b" font-size="9" text-anchor="middle">20</text>
+      <text x="680" y="195" fill="#64748b" font-size="9" text-anchor="middle">25</text>
+      <line x1="126" y1="10" x2="126" y2="180" stroke="var(--accent4)" stroke-width="1" stroke-dasharray="5,3" opacity="0.6"/>
+      <text x="130" y="20" fill="var(--accent4)" font-size="9">Unfreeze all</text>
+      <polyline fill="none" stroke="var(--accent3)" stroke-width="2.5"
+        points="50,178 76,160 101,148 126,137 151,121 176,107 201,100 227,94 252,90 277,87 302,78 327,77 353,76 378,73 403,69 428,64 453,59 479,62 504,58 529,57 554,60 579,57 604,58 630,52 655,48"
+        stroke-dasharray="1000" stroke-dashoffset="1000" style="animation: drawLine 2s ease 0.8s forwards;"/>
+      <polyline fill="none" stroke="var(--accent)" stroke-width="2" opacity="0.5"
+        points="50,181 76,152 101,141 126,130 151,117 176,109 201,102 227,96 252,91 277,88 302,84 327,76 353,75 378,73 403,69 428,67 453,64 479,61 504,59 529,54 554,53 579,55 604,54 630,52 655,50"
+        stroke-dasharray="1000" stroke-dashoffset="1000" style="animation: drawLine 2s ease 1s forwards;"/>
+      <circle cx="655" cy="48" r="5" fill="var(--accent3)" opacity="0" style="animation: fadeIn 0.5s ease 2.5s forwards;"/>
+      <text x="662" y="44" fill="var(--accent3)" font-size="10" font-weight="600" opacity="0" style="animation: fadeIn 0.5s ease 2.5s forwards;">94.97%</text>
+    </svg>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent3);"></div> Validation</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent); opacity:0.5;"></div> Training</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent4);"></div> Unfreeze (Epoch 4)</div>
+    </div>
+  </div>
+  <div class="slide-num"></div>
+</div>
+
+<!-- ==================== SLIDE 10: ABLATION ==================== -->
+<div class="slide v-center" id="s10">
   <h2 class="anim-1"><span class="gradient-text">Ablation</span> Study</h2>
-  <p class="anim-2" style="color:var(--text-dim); margin-bottom:24px;">Impact of removing each component from the final model:</p>
-  <div class="chart-container anim-3" style="padding:30px;">
+  <div class="chart-container anim-2" style="padding:30px;">
     <svg viewBox="0 0 750 280" style="height:280px;">
-      <!-- Baseline -->
       <line x1="530" y1="0" x2="530" y2="280" stroke="var(--accent3)" stroke-width="1.5" stroke-dasharray="6,3" opacity="0.4"/>
       <text x="535" y="15" fill="var(--accent3)" font-size="10" opacity="0.6">95.37% (baseline)</text>
-
-      <!-- Bars -->
-      <!-- No offline aug: 88.12% → delta = -7.25% -->
       <text x="240" y="38" fill="var(--text-dim)" font-size="11" text-anchor="end">No offline augmentation</text>
       <rect x="248" y="24" width="282" height="24" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
       <rect x="350" y="26" width="180" height="20" rx="3" fill="url(#redGrad)" opacity="0.85" style="animation: growWidth 1s ease 0.6s both;"/>
-      <text x="345" y="40" fill="var(--danger)" font-size="10" font-weight="600" text-anchor="end">−7.25%</text>
+      <text x="345" y="40" fill="var(--danger)" font-size="10" font-weight="600" text-anchor="end">-7.25%</text>
       <text x="255" y="40" fill="var(--text-muted)" font-size="9">88.12%</text>
-
-      <!-- ResNet-18: 89.41% → delta = -5.96% -->
       <text x="240" y="78" fill="var(--text-dim)" font-size="11" text-anchor="end">ResNet-18 instead of EffNet-B2</text>
       <rect x="248" y="64" width="282" height="24" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
       <rect x="382" y="66" width="148" height="20" rx="3" fill="url(#redGrad)" opacity="0.8" style="animation: growWidth 1s ease 0.75s both;"/>
-      <text x="377" y="80" fill="var(--danger)" font-size="10" font-weight="600" text-anchor="end">−5.96%</text>
+      <text x="377" y="80" fill="var(--danger)" font-size="10" font-weight="600" text-anchor="end">-5.96%</text>
       <text x="255" y="80" fill="var(--text-muted)" font-size="9">89.41%</text>
-
-      <!-- No gradual unfreezing (frozen): 91.37% → delta = -4.00% -->
-      <text x="240" y="118" fill="var(--text-dim)" font-size="11" text-anchor="end">No gradual unfreezing (frozen)</text>
+      <text x="240" y="118" fill="var(--text-dim)" font-size="11" text-anchor="end">No gradual unfreezing</text>
       <rect x="248" y="104" width="282" height="24" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
       <rect x="430" y="106" width="100" height="20" rx="3" fill="url(#orangeGrad)" opacity="0.8" style="animation: growWidth 1s ease 0.9s both;"/>
-      <text x="425" y="120" fill="var(--accent4)" font-size="10" font-weight="600" text-anchor="end">−4.00%</text>
+      <text x="425" y="120" fill="var(--accent4)" font-size="10" font-weight="600" text-anchor="end">-4.00%</text>
       <text x="255" y="120" fill="var(--text-muted)" font-size="9">91.37%</text>
-
-      <!-- No class weights: 92.80% → delta = -2.57% -->
       <text x="240" y="158" fill="var(--text-dim)" font-size="11" text-anchor="end">No class weights</text>
       <rect x="248" y="144" width="282" height="24" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
       <rect x="466" y="146" width="64" height="20" rx="3" fill="url(#orangeGrad)" opacity="0.7" style="animation: growWidth 1s ease 1.05s both;"/>
-      <text x="461" y="160" fill="var(--accent4)" font-size="10" font-weight="600" text-anchor="end">−2.57%</text>
+      <text x="461" y="160" fill="var(--accent4)" font-size="10" font-weight="600" text-anchor="end">-2.57%</text>
       <text x="255" y="160" fill="var(--text-muted)" font-size="9">92.80%</text>
-
-      <!-- No label smoothing: 93.95% → delta = -1.42% -->
       <text x="240" y="198" fill="var(--text-dim)" font-size="11" text-anchor="end">No label smoothing</text>
       <rect x="248" y="184" width="282" height="24" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
       <rect x="494" y="186" width="36" height="20" rx="3" fill="url(#blueGrad)" opacity="0.7" style="animation: growWidth 1s ease 1.2s both;"/>
-      <text x="489" y="200" fill="var(--accent)" font-size="10" font-weight="600" text-anchor="end">−1.42%</text>
+      <text x="489" y="200" fill="var(--accent)" font-size="10" font-weight="600" text-anchor="end">-1.42%</text>
       <text x="255" y="200" fill="var(--text-muted)" font-size="9">93.95%</text>
-
-      <!-- Full model -->
       <text x="240" y="248" fill="var(--text)" font-size="11" text-anchor="end" font-weight="600">Full model (final)</text>
       <rect x="248" y="234" width="282" height="24" rx="4" fill="var(--surface)" stroke="var(--border)" stroke-width="1"/>
       <rect x="248" y="236" width="282" height="20" rx="3" fill="url(#greenGrad)" opacity="0.4" style="animation: growWidth 1s ease 1.35s both;"/>
       <text x="535" y="250" fill="var(--accent3)" font-size="10" font-weight="700">95.37%</text>
-
-      <!-- Gradients -->
       <defs>
         <linearGradient id="redGrad"><stop offset="0%" stop-color="#dc2626"/><stop offset="100%" stop-color="#f87171"/></linearGradient>
         <linearGradient id="orangeGrad"><stop offset="0%" stop-color="#d97706"/><stop offset="100%" stop-color="#fbbf24"/></linearGradient>
@@ -1032,182 +814,68 @@
       </defs>
     </svg>
   </div>
-  <div class="quote anim-4" style="margin-top:16px;">
-    Most impactful: <strong>offline augmentation</strong> (−7.25%), <strong>backbone choice</strong> (−5.96%), and <strong>gradual unfreezing</strong> (−4.00%).
-  </div>
-  <div class="slide-num">11 / 16</div>
+  <div class="slide-num"></div>
 </div>
 
-<!-- ==================== SLIDE 12: RESULTS VISUALIZATION ==================== -->
-<div class="slide v-center" id="s12">
-  <h2 class="anim-1">Results <span class="gradient-text">Visualization</span></h2>
-  <div class="grid-3 anim-2" style="margin-bottom:24px;">
-    <div class="card" style="text-align:center;">
-      <div style="font-size:3em; margin-bottom:8px;">♜</div>
-      <div style="font-size:2em; font-weight:800; color:var(--accent3);">98.8%</div>
-      <div style="font-size:0.85em; color:var(--text-dim);">Black Rook — Best Class</div>
-      <p style="margin-top:8px; font-size:0.8em;">Highly distinctive castle shape, easily recognized from any angle</p>
-    </div>
-    <div class="card" style="text-align:center;">
-      <div style="font-size:3em; margin-bottom:8px;">♕</div>
-      <div style="font-size:2em; font-weight:800; color:var(--danger);">89.6%</div>
-      <div style="font-size:0.85em; color:var(--text-dim);">White Queen — Most Confused</div>
-      <p style="margin-top:8px; font-size:0.8em;">Similar tall silhouette to rooks and bishops when viewed from overhead</p>
-    </div>
-    <div class="card" style="text-align:center;">
-      <div style="font-size:3em; margin-bottom:8px; color:var(--danger);">✕</div>
-      <div style="font-size:2em; font-weight:800; color:var(--danger);">87.1%</div>
-      <div style="font-size:0.85em; color:var(--text-dim);">Occluded — Hardest Class</div>
-      <p style="margin-top:8px; font-size:0.8em;">Inherently ambiguous — blocked by hands or objects, minimal visual signal</p>
-    </div>
-  </div>
-  <div class="grid-2 anim-3">
-    <div class="card">
-      <h3 style="color:var(--accent3);">Common Correct Predictions</h3>
-      <ul>
-        <li><strong>Rooks</strong>: distinctive castle-top shape → 96–99%</li>
-        <li><strong>Pawns</strong>: most abundant class, consistent small shape → 95%+</li>
-        <li><strong>Empty squares</strong>: clear absence of piece → 95.7%</li>
-        <li><strong>Bishops</strong>: pointed top recognizable → 93–96%</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h3 style="color:var(--danger);">Common Confusions</h3>
-      <ul>
-        <li><strong>Queen ↔ Rook</strong>: both tall, similar overhead profile</li>
-        <li><strong>Queen ↔ Bishop</strong>: queen's cross can look like bishop's point</li>
-        <li><strong>Knight ↔ Bishop</strong>: occasional shape confusion at angles</li>
-        <li><strong>Occluded ↔ Any piece</strong>: partial visibility creates ambiguity</li>
-      </ul>
-    </div>
-  </div>
-  <div class="slide-num">12 / 16</div>
-</div>
-
-<!-- ==================== SLIDE 13: DATASET DETAILS ==================== -->
-<div class="slide v-center" id="s13">
-  <h2 class="anim-1">The <span class="gradient-green">Dataset</span></h2>
-  <div class="grid-4 anim-2" style="margin-bottom:28px;">
-    <div class="card" style="text-align:center; padding:20px;">
-      <div style="font-size:2.5em; font-weight:800; color:var(--accent);">10</div>
-      <div style="font-size:0.85em; color:var(--text-dim);">Chess Games</div>
-    </div>
-    <div class="card" style="text-align:center; padding:20px;">
-      <div style="font-size:2.5em; font-weight:800; color:var(--accent2);">2,980</div>
-      <div style="font-size:0.85em; color:var(--text-dim);">Board Images</div>
-    </div>
-    <div class="card" style="text-align:center; padding:20px;">
-      <div style="font-size:2.5em; font-weight:800; color:var(--accent3);">~191K</div>
-      <div style="font-size:0.85em; color:var(--text-dim);">Square Samples</div>
-    </div>
-    <div class="card" style="text-align:center; padding:20px;">
-      <div style="font-size:2.5em; font-weight:800; color:var(--accent4);">14</div>
-      <div style="font-size:0.85em; color:var(--text-dim);">Classes</div>
-    </div>
-  </div>
-  <div class="grid-2 anim-3">
-    <div class="card">
-      <h3 style="color:var(--accent);">Train / Validation Split</h3>
-      <ul>
-        <li><strong>Frame-group split</strong>: group by (game_id, frame)</li>
-        <li>80% train / 20% val — no augmentation leakage</li>
-        <li><strong>2,385</strong> training boards (152,640 squares)</li>
-        <li><strong>595</strong> validation boards (38,080 squares)</li>
-        <li>Validation spans <strong>9 of 10</strong> games</li>
-      </ul>
-    </div>
-    <div class="card">
-      <h3 style="color:var(--accent2);">Class Distribution</h3>
-      <div class="bar-chart" style="margin-top:10px;">
-        <div class="bar-row"><span class="bar-label" style="width:75px;">Empty</span><div class="bar-track"><div class="bar-fill blue" style="width:90%;">25,280</div></div></div>
-        <div class="bar-row"><span class="bar-label" style="width:75px;">Pawns</span><div class="bar-track"><div class="bar-fill green" style="width:24%;">6,260</div></div></div>
-        <div class="bar-row"><span class="bar-label" style="width:75px;">Rooks</span><div class="bar-track"><div class="bar-fill purple" style="width:7%;">1,670</div></div></div>
-        <div class="bar-row"><span class="bar-label" style="width:75px;">Bishops</span><div class="bar-track"><div class="bar-fill purple" style="width:5%;">1,265</div></div></div>
-        <div class="bar-row"><span class="bar-label" style="width:75px;">Kings</span><div class="bar-track"><div class="bar-fill yellow" style="width:4.5%;">1,160</div></div></div>
-        <div class="bar-row"><span class="bar-label" style="width:75px;">Knights</span><div class="bar-track"><div class="bar-fill yellow" style="width:4.5%;">1,165</div></div></div>
-        <div class="bar-row"><span class="bar-label" style="width:75px;">Queens</span><div class="bar-track"><div class="bar-fill red" style="width:3%;">670</div></div></div>
-        <div class="bar-row"><span class="bar-label" style="width:75px;">Occluded</span><div class="bar-track"><div class="bar-fill red" style="width:2.5%;">610</div></div></div>
-      </div>
-      <p style="margin-top:10px; font-size:0.8em; color:var(--accent4);">→ WeightedRandomSampler balances rare classes during training</p>
-    </div>
-  </div>
-  <div class="slide-num">13 / 16</div>
-</div>
-
-<!-- ==================== SLIDE 14: FAILED EXPERIMENTS ==================== -->
-<div class="slide" id="s14">
+<!-- ==================== SLIDE 11: FAILED EXPERIMENTS ==================== -->
+<div class="slide v-center" id="s11">
   <h2 class="anim-1">What <span class="gradient-warm">Didn't Work</span></h2>
-  <div class="grid-2">
-    <div class="anim-left">
+  <div class="grid-2 anim-2">
+    <div>
       <div class="fail-item">
-        <h4>✕ ResNet18 / ResNet50 / Swin Transformer</h4>
-        <p>ResNet18 lacked capacity. ResNet50 and Swin overfit on our small dataset. EfficientNet-B2 was the sweet spot between capacity and generalization.</p>
+        <h4>Other Backbones</h4>
+        <p>ResNet18 too weak, ResNet50/Swin overfit. EfficientNet-B2 was the sweet spot.</p>
       </div>
       <div class="fail-item">
-        <h4>✕ Board-Level Transformer Context</h4>
-        <p>2-layer TransformerEncoder letting squares attend to each other. Added complexity without improving accuracy — the 70% overlap padding already provides sufficient spatial context.</p>
-      </div>
-      <div class="fail-item">
-        <h4>✕ Full Fine-Tuning from Epoch 1</h4>
-        <p>Without any freezing, the model memorized training data immediately. 95% train vs 72% val — catastrophic forgetting destroyed ImageNet features.</p>
+        <h4>Board-Level Transformer</h4>
+        <p>Squares attending to each other added complexity without gains - overlap padding already provides context.</p>
       </div>
     </div>
-    <div class="anim-right">
+    <div>
       <div class="fail-item">
-        <h4>✕ Heavy Online Augmentation</h4>
-        <p>Strong ColorJitter (0.3/0.3) was redundant with offline variants, creating unrealistic training images. Reducing to 0.1/0.1 improved results.</p>
+        <h4>Full Fine-Tuning from Start</h4>
+        <p>Catastrophic forgetting destroyed ImageNet features. 95% train vs 72% val.</p>
       </div>
       <div class="fail-item">
-        <h4>✕ Higher Dropout (0.4)</h4>
-        <p>Excessive regularization reduced model capacity unnecessarily. Dropout 0.3 was the right balance for our data size.</p>
-      </div>
-      <div class="fail-item">
-        <h4>✕ Game-Level Validation Split</h4>
-        <p>Splitting by game gave only 200 unrepresentative samples from 2 games. The model appeared to generalize but actually had data leakage through augmented variants.</p>
+        <h4>Heavy Augmentation</h4>
+        <p>Strong ColorJitter overlapped with offline variants, creating unrealistic images.</p>
       </div>
     </div>
   </div>
-  <div class="slide-num">14 / 16</div>
+  <div class="slide-num"></div>
 </div>
 
-<!-- ==================== SLIDE 15: TAKEAWAYS ==================== -->
-<div class="slide v-center" id="s15">
+<!-- ==================== SLIDE 12: TAKEAWAYS ==================== -->
+<div class="slide v-center" id="s12">
   <h2 class="anim-1">Key <span class="gradient-text">Takeaways</span></h2>
   <div style="max-width:900px; margin:0 auto;">
     <div class="takeaway anim-2">
       <div class="takeaway-n gradient-text">1</div>
       <div>
         <h4>Data Quality > Model Complexity</h4>
-        <p>Fixing the data split and augmentation strategy yielded far bigger gains than any architectural change. Offline augmentation alone contributed +7.25%.</p>
+        <p>Proper split and augmentation contributed more than any architecture change</p>
       </div>
     </div>
     <div class="takeaway anim-3">
       <div class="takeaway-n gradient-green">2</div>
       <div>
-        <h4>Gradual Unfreezing for Small Datasets</h4>
-        <p>Stabilizing the head before fine-tuning the backbone was our most impactful technique. It prevents catastrophic forgetting while enabling domain adaptation (+4.00%).</p>
+        <h4>Gradual Unfreezing is Key</h4>
+        <p>Stabilize the head, then fine-tune everything - prevents catastrophic forgetting (+4%)</p>
       </div>
     </div>
     <div class="takeaway anim-4">
       <div class="takeaway-n gradient-warm">3</div>
       <div>
         <h4>Right-Sized Models Win</h4>
-        <p>EfficientNet-B2 outperformed both smaller (ResNet18, −5.96%) and larger (Swin, ResNet50) alternatives. With limited data, the right inductive bias matters more than capacity.</p>
-      </div>
-    </div>
-    <div class="takeaway anim-5">
-      <div class="takeaway-n" style="color:var(--accent2);">4</div>
-      <div>
-        <h4>Domain Knowledge as Free Constraints</h4>
-        <p>Chess rules (one king, no pawns on rank 1/8, piece limits) are guaranteed constraints that catch errors the model can't learn from limited data — essentially free accuracy.</p>
+        <p>With limited data, inductive bias matters more than raw capacity</p>
       </div>
     </div>
   </div>
-  <div class="slide-num">15 / 16</div>
+  <div class="slide-num"></div>
 </div>
 
-<!-- ==================== SLIDE 16: THANK YOU ==================== -->
-<div class="slide center" id="s16">
+<!-- ==================== SLIDE 13: THANK YOU ==================== -->
+<div class="slide center" id="s13">
   <div class="anim-1" style="font-size:4em; margin-bottom:20px;">♔ ♚</div>
   <h1 class="anim-2"><span class="gradient-text">Thank You</span></h1>
   <p class="anim-3" style="font-size:1.3em; color:var(--text-dim); margin-top:12px;">Questions?</p>
@@ -1215,10 +883,10 @@
   <p class="anim-4" style="font-size:1.05em;"><strong>Guy Shick &nbsp;·&nbsp; Tomer Tocker &nbsp;·&nbsp; Jonathan Arbel</strong></p>
   <div class="anim-5" style="margin-top:24px; display:flex; gap:12px; justify-content:center;">
     <span class="tag tag-green" style="font-size:0.95em; padding:6px 16px;">95.37% Accuracy</span>
-    <span class="tag tag-blue" style="font-size:0.95em; padding:6px 16px;">14 Classes · 64 Squares</span>
-    <span class="tag tag-purple" style="font-size:0.95em; padding:6px 16px;">10 Games · 2,980 Boards</span>
+    <span class="tag tag-blue" style="font-size:0.95em; padding:6px 16px;">14 Classes</span>
+    <span class="tag tag-purple" style="font-size:0.95em; padding:6px 16px;">10 Games</span>
   </div>
-  <div class="slide-num">16 / 16</div>
+  <div class="slide-num"></div>
 </div>
 
 <div class="nav-hint">← → Arrow Keys &nbsp;|&nbsp; Click to Navigate &nbsp;|&nbsp; Swipe on Mobile</div>
