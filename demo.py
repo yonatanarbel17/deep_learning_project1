@@ -85,12 +85,12 @@ def render_board_svg(board, occluded_squares, output_path):
         row = 7 - chess.square_rank(sq)
         x = margin + col * sq_size
         y = margin + row * sq_size
-        pad = sq_size * 0.12
+        pad = sq_size * 0.08
         x_mark = (
             f'<line x1="{x+pad}" y1="{y+pad}" x2="{x+sq_size-pad}" y2="{y+sq_size-pad}" '
-            f'stroke="red" stroke-width="8" stroke-linecap="round"/>'
+            f'stroke="red" stroke-width="18"/>'
             f'<line x1="{x+sq_size-pad}" y1="{y+pad}" x2="{x+pad}" y2="{y+sq_size-pad}" '
-            f'stroke="red" stroke-width="8" stroke-linecap="round"/>'
+            f'stroke="red" stroke-width="18"/>'
         )
         svg_str = svg_str.replace('</svg>', x_mark + '</svg>')
 
@@ -162,11 +162,11 @@ def visualize_prediction(original_img, pred_grid, pred_fen, confidences, output_
 
             if cell == 'unknown' or cell == 13:
                 # Draw bold red X filling the square
-                pad = 0.12
+                pad = 0.08
                 ax2.plot([col + pad, col + 1 - pad], [7 - row + pad, 7 - row + 1 - pad],
-                         color='red', linewidth=6, solid_capstyle='round')
+                         color='red', linewidth=14, solid_capstyle='butt')
                 ax2.plot([col + 1 - pad, col + pad], [7 - row + pad, 7 - row + 1 - pad],
-                         color='red', linewidth=6, solid_capstyle='round')
+                         color='red', linewidth=14, solid_capstyle='butt')
             else:
                 char = id_to_char.get(cell, '?')
                 if char.strip():
