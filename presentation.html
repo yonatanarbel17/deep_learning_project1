@@ -448,7 +448,7 @@
   <p class="anim-3" style="font-size:1.2em; color:var(--text-dim); margin-top:16px;">Project 1 - Square Classification & Board-State Reconstruction</p>
   <div style="height:50px;"></div>
   <p class="anim-4" style="font-size:1.1em;"><strong>Guy Shick &nbsp;·&nbsp; Tomer Tocker &nbsp;·&nbsp; Jonathan Arbel</strong></p>
-  <p class="anim-5" style="color:var(--text-muted); margin-top:6px;">B.Sc. Computer Science &nbsp;|&nbsp; Introduction to Deep Learning, 2025</p>
+  <p class="anim-5" style="color:var(--text-muted); margin-top:6px;">B.Sc. Computer Science &nbsp;|&nbsp; Introduction to Deep Learning, 2026</p>
   <div class="slide-num"></div>
 </div>
 
@@ -510,8 +510,6 @@
     <div class="pipe-arrow">→</div>
     <div class="pipe-step active-step"><div class="pipe-icon">🧠</div><div class="pipe-title">EfficientNet-B2</div><div class="pipe-sub">14-class</div></div>
     <div class="pipe-arrow">→</div>
-    <div class="pipe-step"><div class="pipe-icon">♚</div><div class="pipe-title">Chess Rules</div><div class="pipe-sub">Post-process</div></div>
-    <div class="pipe-arrow">→</div>
     <div class="pipe-step"><div class="pipe-icon">📋</div><div class="pipe-title">FEN</div></div>
   </div>
   <div class="grid-3 anim-3">
@@ -524,8 +522,8 @@
       <p>Each square sees its neighbors - crucial context for identifying pieces</p>
     </div>
     <div class="card">
-      <h3 style="color:var(--accent);">Chess Rules</h3>
-      <p>No pawns on rank 1/8, one king per side, piece count limits</p>
+      <h3 style="color:var(--accent);">OOD Detection</h3>
+      <p>Supervised occlusion class + confidence thresholding for unknown squares</p>
     </div>
   </div>
   <div class="slide-num"></div>
@@ -536,19 +534,19 @@
   <h2 class="anim-1">Overcoming the <span class="gradient-warm">Main Challenges</span></h2>
   <div class="grid-2 anim-2">
     <div class="card glow-red">
-      <h3 style="color:var(--danger);">Problem: Data Leakage</h3>
+      <h3 style="color:var(--danger);">Problem: Naive Splitting</h3>
       <ul>
-        <li>Game-level split: only 200 val samples from 2 games</li>
-        <li>Augmented variants leaked across splits</li>
-        <li style="color:var(--danger);"><strong>23-point overfit gap</strong> (95% train vs 72% val)</li>
+        <li>Splitting by game gave only 200 val samples from 2 games — too small and unrepresentative</li>
+        <li>Random splitting could place an original frame in train and its augmented variant in val — the model memorizes instead of learning</li>
+        <li style="color:var(--danger);"><strong>Result:</strong> 95% train vs 72% val accuracy</li>
       </ul>
     </div>
     <div class="card glow-green">
       <h3 style="color:var(--accent3);">Solution: Frame-Group Split</h3>
       <ul>
-        <li>Group by (game_id, frame) - all variants stay together</li>
-        <li>595 val samples from 9 games</li>
-        <li style="color:var(--accent3);"><strong>No overfitting</strong> - val ≥ train</li>
+        <li>Group by (game_id, frame) — each frame and all its augmented variants go to the same split</li>
+        <li>20% of frame-groups held for validation → 595 boards from 9 games</li>
+        <li style="color:var(--accent3);"><strong>Result:</strong> balanced, representative validation with no data leakage</li>
       </ul>
     </div>
   </div>
@@ -781,7 +779,7 @@
     </div>
   </div>
   <div class="chart-container anim-3">
-    <div class="chart-title">Validation Accuracy - Run 3</div>
+    <div class="chart-title">Validation Accuracy - Run 4 (Final, 30 Epochs)</div>
     <svg viewBox="0 0 700 200" style="height:200px;">
       <line x1="50" y1="10" x2="50" y2="180" stroke="#cbd5e1" stroke-width="1"/>
       <line x1="50" y1="180" x2="680" y2="180" stroke="#cbd5e1" stroke-width="1"/>
@@ -793,19 +791,19 @@
       <text x="45" y="84" fill="#64748b" font-size="10" text-anchor="end">90%</text>
       <text x="45" y="34" fill="#64748b" font-size="10" text-anchor="end">100%</text>
       <text x="50" y="195" fill="#64748b" font-size="9" text-anchor="middle">1</text>
-      <text x="302" y="195" fill="#64748b" font-size="9" text-anchor="middle">10</text>
-      <text x="554" y="195" fill="#64748b" font-size="9" text-anchor="middle">20</text>
-      <text x="680" y="195" fill="#64748b" font-size="9" text-anchor="middle">25</text>
-      <line x1="126" y1="10" x2="126" y2="180" stroke="var(--accent4)" stroke-width="1" stroke-dasharray="5,3" opacity="0.6"/>
-      <text x="130" y="20" fill="var(--accent4)" font-size="9">Unfreeze all</text>
+      <text x="260" y="195" fill="#64748b" font-size="9" text-anchor="middle">10</text>
+      <text x="470" y="195" fill="#64748b" font-size="9" text-anchor="middle">20</text>
+      <text x="680" y="195" fill="#64748b" font-size="9" text-anchor="middle">30</text>
+      <line x1="113" y1="10" x2="113" y2="180" stroke="var(--accent4)" stroke-width="1" stroke-dasharray="5,3" opacity="0.6"/>
+      <text x="117" y="20" fill="var(--accent4)" font-size="9">Unfreeze all</text>
       <polyline fill="none" stroke="var(--accent3)" stroke-width="2.5"
-        points="50,178 76,160 101,148 126,137 151,121 176,107 201,100 227,94 252,90 277,87 302,78 327,77 353,76 378,73 403,69 428,64 453,59 479,62 504,58 529,57 554,60 579,57 604,58 630,52 655,48"
+        points="50,178 71,157 92,145 113,134 134,120 155,108 176,100 197,94 218,90 239,87 260,78 281,77 302,76 323,73 344,69 365,64 386,59 407,62 428,58 449,57 470,60 491,52 512,50 533,49 554,48 575,49 596,48 617,49 638,48 659,46 680,44"
         stroke-dasharray="1000" stroke-dashoffset="1000" style="animation: drawLine 2s ease 0.8s forwards;"/>
       <polyline fill="none" stroke="var(--accent)" stroke-width="2" opacity="0.5"
-        points="50,181 76,152 101,141 126,130 151,117 176,109 201,102 227,96 252,91 277,88 302,84 327,76 353,75 378,73 403,69 428,67 453,64 479,61 504,59 529,54 554,53 579,55 604,54 630,52 655,50"
+        points="50,181 71,152 92,141 113,130 134,117 155,109 176,102 197,96 218,91 239,88 260,84 281,76 302,75 323,73 344,69 365,67 386,64 407,61 428,59 449,54 470,53 491,55 512,54 533,52 554,50 575,49 596,48 617,48 638,47 659,46 680,45"
         stroke-dasharray="1000" stroke-dashoffset="1000" style="animation: drawLine 2s ease 1s forwards;"/>
-      <circle cx="655" cy="48" r="5" fill="var(--accent3)" opacity="0" style="animation: fadeIn 0.5s ease 2.5s forwards;"/>
-      <text x="662" y="44" fill="var(--accent3)" font-size="10" font-weight="600" opacity="0" style="animation: fadeIn 0.5s ease 2.5s forwards;">94.97%</text>
+      <circle cx="680" cy="44" r="5" fill="var(--accent3)" opacity="0" style="animation: fadeIn 0.5s ease 2.5s forwards;"/>
+      <text x="662" y="38" fill="var(--accent3)" font-size="10" font-weight="600" opacity="0" style="animation: fadeIn 0.5s ease 2.5s forwards;">95.37%</text>
     </svg>
     <div class="chart-legend">
       <div class="legend-item"><div class="legend-dot" style="background:var(--accent3);"></div> Validation</div>
@@ -869,22 +867,22 @@
   <div class="grid-2 anim-2">
     <div>
       <div class="fail-item">
-        <h4>Other Backbones</h4>
-        <p>ResNet18 too weak, ResNet50/Swin overfit. EfficientNet-B2 was the sweet spot.</p>
+        <h4>ResNet-18 Backbone</h4>
+        <p>Too weak for fine-grained piece classification. EfficientNet-B2 gave +6% accuracy.</p>
       </div>
-      <div class="fail-item">
-        <h4>Board-Level Transformer</h4>
-        <p>Squares attending to each other added complexity without gains - overlap padding already provides context.</p>
-      </div>
-    </div>
-    <div>
       <div class="fail-item">
         <h4>Full Fine-Tuning from Start</h4>
         <p>Catastrophic forgetting destroyed ImageNet features. 95% train vs 72% val.</p>
       </div>
+    </div>
+    <div>
       <div class="fail-item">
         <h4>Heavy Augmentation</h4>
-        <p>Strong ColorJitter overlapped with offline variants, creating unrealistic images.</p>
+        <p>Strong ColorJitter overlapped with offline variants, creating unrealistic images. Reducing to mild values improved results.</p>
+      </div>
+      <div class="fail-item">
+        <h4>Higher Dropout (0.4)</h4>
+        <p>Reduced model capacity without enough regularization benefit. Reverting to 0.3 with gradual unfreezing worked better.</p>
       </div>
     </div>
   </div>
@@ -920,8 +918,56 @@
   <div class="slide-num"></div>
 </div>
 
-<!-- ==================== SLIDE 13: THANK YOU ==================== -->
-<div class="slide center" id="s13">
+<!-- ==================== SLIDE 13: DEMO OUTPUT ==================== -->
+<div class="slide v-center" id="s13">
+  <h2 class="anim-1">Demo <span class="gradient-text">Output</span></h2>
+  <div class="grid-2 anim-2">
+    <div>
+      <div class="card glow-blue" style="margin-bottom:16px;">
+        <h3 style="color:var(--accent);">How It Works</h3>
+        <p style="font-family:'JetBrains Mono',monospace; font-size:0.85em; background:var(--card); padding:12px; border-radius:8px; margin-top:8px;">
+          python predict.py --image board.jpg
+        </p>
+        <ul style="margin-top:12px;">
+          <li>Takes a single RGB image as input</li>
+          <li>Returns an 8×8 tensor with class IDs (0-13)</li>
+          <li>Saves a chess diagram SVG to <code>./results/</code></li>
+          <li>Occluded squares marked with <strong style="color:var(--danger);">red X</strong></li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--accent2);">Output Tensor Example</h3>
+        <pre style="font-family:'JetBrains Mono',monospace; font-size:0.75em; background:var(--card); padding:10px; border-radius:8px; line-height:1.4;">tensor([[ 7, 8, 9,10,11, 9, 8, 7],
+        [ 6, 6, 6, 6, 6, 6, 6, 6],
+        [12,12,12,12,12,12,12,12],
+        [12,12,12,12,12,12,12,12],
+        [12,12,12,12,12,12,12,12],
+        [12,12,12,12,12,12,12,12],
+        [ 0, 0, 0, 0, 0, 0, 0, 0],
+        [ 1, 2, 3, 4, 5, 3, 2, 1]])</pre>
+      </div>
+    </div>
+    <div class="center">
+      <div style="background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px; width:320px;">
+        <div style="display:grid; grid-template-columns:repeat(8,1fr); gap:0; border:2px solid #333; border-radius:4px; overflow:hidden;">
+          <div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;">♜</div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;">♞</div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;">♝</div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;">♛</div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;">♚</div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;">♝</div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;">♞</div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;color:red;font-weight:bold;">✕</div>
+          <div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;">♟</div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;">♟</div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;">♟</div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;">♟</div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;">♟</div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;">♟</div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;">♟</div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;color:red;font-weight:bold;">✕</div>
+          <div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;"> </div>
+          <div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;"> </div>
+          <div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;"> </div>
+          <div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;"> </div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;"> </div>
+          <div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;">♙</div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;">♙</div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;">♙</div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;">♙</div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;">♙</div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;">♙</div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;">♙</div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;">♙</div>
+          <div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;">♖</div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;">♘</div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;">♗</div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;">♕</div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;">♔</div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;">♗</div><div style="background:#d18b47;padding:4px;text-align:center;font-size:1.4em;">♘</div><div style="background:#ffce9e;padding:4px;text-align:center;font-size:1.4em;">♖</div>
+        </div>
+        <p style="font-size:0.85em; color:var(--text-muted); margin-top:10px; text-align:center;">Example output with <span style="color:var(--danger);">red X</span> = occluded</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num"></div>
+</div>
+
+<!-- ==================== SLIDE 14: THANK YOU ==================== -->
+<div class="slide center" id="s14">
   <div class="anim-1" style="font-size:4em; margin-bottom:20px;">♔ ♚</div>
   <h1 class="anim-2"><span class="gradient-text">Thank You</span></h1>
   <p class="anim-3" style="font-size:1.3em; color:var(--text-dim); margin-top:12px;">Questions?</p>
@@ -931,6 +977,10 @@
     <span class="tag tag-green" style="font-size:0.95em; padding:6px 16px;">95.37% Accuracy</span>
     <span class="tag tag-blue" style="font-size:0.95em; padding:6px 16px;">14 Classes</span>
     <span class="tag tag-purple" style="font-size:0.95em; padding:6px 16px;">10 Games</span>
+  </div>
+  <div style="margin-top:30px; font-size:0.85em; color:var(--text-muted);">
+    <p>GitHub: <a href="https://github.com/yonatanarbel17/deep_learning_project1" style="color:var(--accent);">github.com/yonatanarbel17/deep_learning_project1</a></p>
+    <p>Dataset: <a href="https://drive.google.com/drive/folders/0AJ4WELBjotejUk9PVA" style="color:var(--accent);">Shared Google Drive</a></p>
   </div>
   <div class="slide-num"></div>
 </div>
