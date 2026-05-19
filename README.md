@@ -159,8 +159,6 @@ python propagate_occlusions.py
 │   │   └── trainer.py        # Training loop with gradual unfreezing
 │   └── utils/
 │       └── visualization.py  # Training curves and reports
-├── scripts/
-│   └── plot_run4_curves.py   # Plot training curves for Run 4
 ├── data/                     # Training data (10 games with augmented variants)
 ├── outputs/
 │   └── best_model.pth        # Trained EfficientNet-B2 weights
