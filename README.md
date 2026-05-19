@@ -169,6 +169,7 @@ python propagate_occlusions.py
 | Metric | Value |
 |--------|-------|
 | Validation Accuracy | 95.37% |
+| Training Epochs | 30 |
 | Training Data | 10 games, 2,980 boards |
 | Classes | 14 (12 pieces + empty + occluded) |
 | Backbone | EfficientNet-B2 (pretrained ImageNet) |
