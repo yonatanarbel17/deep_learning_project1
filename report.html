@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chess Board State Recognition from Real-World Images</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,wght@0,400;0,600;0,700;1,400&family=Source+Sans+3:wght@400;600;700&display=swap');
+
+  @page {
+    size: A4;
+    margin: 2.5cm 2.5cm 2.5cm 2.5cm;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Source Serif 4', 'Georgia', serif;
+    font-size: 12pt;
+    line-height: 1.6;
+    color: #1a1a2e;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 40px 20px;
+  }
+
+  /* Title page */
+  .title-page {
+    text-align: center;
+    padding: 180px 0 100px;
+    page-break-after: always;
+  }
+  .title-page h1 {
+    font-size: 26pt;
+    font-weight: 700;
+    color: #1a1a2e;
+    line-height: 1.3;
+    margin-bottom: 30px;
+  }
+  .title-page .subtitle {
+    font-size: 14pt;
+    color: #444;
+    margin-bottom: 40px;
+  }
+  .title-page .authors {
+    font-size: 13pt;
+    color: #333;
+    margin-bottom: 15px;
+  }
+  .title-page .date {
+    font-size: 12pt;
+    color: #666;
+  }
+
+  /* Headings */
+  h2 {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 17pt;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-top: 35px;
+    margin-bottom: 12px;
+    border-bottom: 2px solid #e0e0e0;
+    padding-bottom: 5px;
+  }
+  h3 {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 13pt;
+    font-weight: 600;
+    color: #2c3e6b;
+    margin-top: 22px;
+    margin-bottom: 8px;
+  }
+
+  p {
+    margin-bottom: 10px;
+    text-align: justify;
+    hyphens: auto;
+  }
+
+  /* Abstract */
+  .abstract {
+    margin: 20px 40px;
+    font-size: 11pt;
+  }
+  .abstract-title {
+    font-family: 'Source Sans 3', sans-serif;
+    font-size: 15pt;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin-bottom: 8px;
+  }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 15px 0;
+    font-size: 10.5pt;
+  }
+  th {
+    background: #1a1a2e;
+    color: #fff;
+    padding: 8px 12px;
+    text-align: center;
+    font-family: 'Source Sans 3', sans-serif;
+    font-weight: 600;
+    font-size: 10pt;
+  }
+  td {
+    padding: 6px 12px;
+    border-bottom: 1px solid #e0e0e0;
+    text-align: center;
+  }
+  tr:nth-child(even) { background: #f8f9fb; }
+  .table-caption {
+    font-size: 10pt;
+    color: #666;
+    text-align: center;
+    margin-top: 5px;
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+  td.left, th.left { text-align: left; }
+
+  /* Lists */
+  ul, ol {
+    margin: 8px 0 10px 25px;
+  }
+  li {
+    margin-bottom: 3px;
+  }
+
+  /* Bold terms */
+  .term {
+    font-weight: 700;
+  }
+
+  /* References */
+  .references {
+    font-size: 10.5pt;
+  }
+  .references p {
+    margin-bottom: 6px;
+    padding-left: 30px;
+    text-indent: -30px;
+  }
+
+  /* Page breaks */
+  .page-break { page-break-before: always; }
+
+  code {
+    font-family: 'Courier New', monospace;
+    font-size: 10pt;
+    background: #f0f0f0;
+    padding: 1px 4px;
+    border-radius: 3px;
+  }
+
+  a { color: #2c3e6b; }
+</style>
+</head>
+<body>
+
+<!-- TITLE PAGE -->
+<div class="title-page">
+  <h1>Chess Board State Recognition<br>from Real-World Images</h1>
+  <div class="subtitle">Deep Learning Project Report</div>
+  <div class="authors">Yonatan Arbel, Guy Shick, Tomer Tocker</div>
+  <div class="date">May 2026</div>
+</div>
+
+<!-- ABSTRACT -->
+<div class="abstract-title">Abstract</div>
+<div class="abstract">
+  <p>We present a deep learning system for recognizing chess board states from real-world photographs. Given a single static image of a physical chessboard, the system classifies each of the 64 squares into one of 14 categories (12 piece types, empty, or occluded) and reconstructs the board state as a FEN string. Our approach uses an EfficientNet-B2 backbone with gradual unfreezing, trained on 2,980 board images from 10 games with offline augmentation. We achieve 95.37% square-level validation accuracy with a frame-group split that prevents data leakage. An ablation study demonstrates that gradual unfreezing contributes +4.0% accuracy over a frozen backbone, and that the frame-group split is critical for reliable evaluation (+22.8% over a naive game-level split). The system additionally incorporates temperature-scaled confidence calibration, out-of-distribution detection for occluded squares, and chess-rule post-processing constraints.</p>
+</div>
+
+<!-- 1. INTRODUCTION -->
+<h2>1. Introduction</h2>
+
+<p>Automatic chess board state recognition from images is a challenging computer vision task with applications in game recording, broadcasting, and accessibility. Given a single photograph of a physical chessboard, the goal is to identify the piece on each of the 64 squares and produce a complete board state in Forsyth-Edwards Notation (FEN).</p>
+
+<p>The task presents several challenges: varying lighting conditions across games, different camera angles and board appearances, visual similarity between certain piece types (e.g., queens and rooks), and partial occlusions caused by players' hands during play. Our system must also handle the class imbalance inherent in chess positions, where empty squares vastly outnumber any single piece type.</p>
+
+<p>Our main contributions are: (1) a board-level classification pipeline using EfficientNet-B2 with gradual unfreezing that achieves 95.37% accuracy; (2) a frame-group validation split that prevents augmentation leakage while maintaining representative validation coverage; (3) a supervised occlusion class combined with confidence thresholding for out-of-distribution detection, supported by a custom interactive annotation tool; and (4) chess-rule post-processing that enforces domain constraints on predictions.</p>
+
+<!-- 2. RELATED WORK -->
+<h2>2. Related Work</h2>
+
+<p>Chess board recognition has been explored using both classical computer vision and deep learning approaches. Early work relied on template matching and color-based segmentation, which struggled with varying lighting and piece styles.</p>
+
+<p>Transfer learning from ImageNet-pretrained models has become standard for small-dataset image classification. Howard and Ruder (2018) introduced gradual unfreezing for fine-tuning language models, which we adapt for our vision task. EfficientNet (Tan and Le, 2019) provides an efficient backbone architecture that balances accuracy and computational cost.</p>
+
+<p>Our work differs from prior approaches in several ways: we use a supervised occlusion class rather than treating occlusions as post-hoc outliers, we apply temperature scaling for confidence calibration, and we enforce chess-rule constraints as a post-processing step.</p>
+
+<!-- 3. METHOD -->
+<h2>3. Method</h2>
+
+<h3>3.1 Pipeline Overview</h3>
+
+<p>The system operates in four stages: (1) board detection and perspective correction using OpenCV, (2) extraction of 64 individual square images with contextual padding, (3) classification of each square using an EfficientNet-B2 backbone, and (4) FEN reconstruction with chess-rule post-processing. The entire pipeline processes a single board image and outputs a FEN string.</p>
+
+<h3>3.2 Board Detection and Square Extraction</h3>
+
+<p>Each input image undergoes perspective correction to produce a canonical 512x512 top-down view of the board. The corrected image is divided into 64 squares, each extracted with 70% overlap padding from neighboring squares. This padding provides contextual information about adjacent pieces, which helps the classifier distinguish visually similar pieces. Each square is resized to 224x224 pixels.</p>
+
+<h3>3.3 Model Architecture</h3>
+
+<p>We use EfficientNet-B2 pretrained on ImageNet as the backbone feature extractor. The original classification head is replaced with Dropout(0.3) followed by a linear layer mapping the 1,408-dimensional feature vector to 14 output classes. The model processes all 64 squares of a board in a single forward pass, producing a (B, 64, 14) tensor of logits where B is the batch size.</p>
+
+<h3>3.4 Gradual Unfreezing</h3>
+
+<p>We employ a gradual unfreezing strategy inspired by ULMFiT (Howard and Ruder, 2018). For epochs 1-3, 60% of the backbone parameters (179 of 299 parameter groups) are frozen, allowing only the classifier head and upper backbone layers to adapt to the chess domain. At epoch 4, all layers are unfrozen and the learning rate is halved from 5e-5 to 2.5e-5. This prevents catastrophic forgetting of pretrained features while enabling full network fine-tuning.</p>
+
+<h3>3.5 Loss Function and Class Balancing</h3>
+
+<p>We use cross-entropy loss with label smoothing (alpha=0.1) to regularize predictions and improve calibration. Class imbalance is addressed through inverse-frequency class weights in the loss function. A WeightedRandomSampler computes board-level sampling weights as the mean inverse-frequency across all 64 squares, ensuring balanced class representation during training.</p>
+
+<h3>3.6 Training Configuration</h3>
+
+<p>We use AdamW with initial learning rate 5e-5 and weight decay 1e-3. Gradient clipping (max_norm=1.0) is applied for stability. A ReduceLROnPlateau scheduler monitors validation accuracy (patience=3, factor=0.5). Online augmentations include ColorJitter (brightness=0.1, contrast=0.1), random affine (rotation 5 degrees, translation 3%), RandomGrayscale (p=0.1), GaussianBlur (p=0.2), and RandomErasing (p=0.25). These are intentionally mild since offline augmentation already provides substantial diversity.</p>
+
+<h3>3.7 OOD Detection and Post-Processing</h3>
+
+<p>Out-of-distribution detection uses a hybrid approach: (1) a supervised occlusion class (class 13) trained on manually annotated occluded squares, and (2) confidence thresholding on temperature-scaled softmax probabilities. The temperature parameter (T=1.24) is optimized via L-BFGS on the validation set. The confidence threshold is set to 0.1, meaning squares where the model's maximum softmax probability falls below this value are classified as occluded.</p>
+
+<p>To obtain the occlusion labels, we built an interactive annotation tool (<code>tag_occlusions.py</code>) that displays each board frame and allows click-based marking of occluded squares. Annotations are stored in a separate column in each game's CSV file, keeping the original FEN strings intact. These labels are then propagated to all augmented variants of each frame.</p>
+
+<p>Chess-rule post-processing enforces: no pawns on ranks 1/8, exactly one king per side, and piece counts within starting-position limits.</p>
+
+<!-- 4. EXPERIMENTS -->
+<h2>4. Experiments</h2>
+
+<h3>4.1 Dataset</h3>
+
+<p>Our dataset consists of 10 chess games (games 2, 4-12) recorded with an overhead camera. Each game is augmented offline with 4 variants (bright, dark, color-shifted, noisy), yielding 2,980 total board images. Occluded squares are manually annotated and propagated across augmented variants. The dataset contains approximately 190,720 individual square samples (2,980 boards x 64 squares). The full dataset is available at: <a href="https://drive.google.com/drive/folders/0AJ4WELBjotejUk9PVA">https://drive.google.com/drive/folders/0AJ4WELBjotejUk9PVA</a></p>
+
+<h3>4.2 Evaluation Protocol</h3>
+
+<p>We use a frame-group split: 20% of unique (game_id, frame_number) groups are held out for validation. Augmented variants always stay with their original frame to prevent data leakage. This yields 2,385 training boards (152,640 squares) and 595 validation boards (38,080 squares). The primary metric is square-level classification accuracy.</p>
+
+<h3>4.3 Results</h3>
+
+<table>
+  <tr><th class="left">Metric</th><th>Value</th></tr>
+  <tr><td class="left">Validation Accuracy</td><td>95.37%</td></tr>
+  <tr><td class="left">Training Accuracy</td><td>94.74%</td></tr>
+  <tr><td class="left">Overfit Gap</td><td>-0.62%</td></tr>
+  <tr><td class="left">Validation Loss</td><td>1.8664</td></tr>
+  <tr><td class="left">Calibrated Temperature</td><td>1.2444</td></tr>
+</table>
+<div class="table-caption">Table 1: Final model performance (Run 4, 30 epochs).</div>
+
+<h3>4.4 Per-Class Analysis</h3>
+
+<table>
+  <tr><th class="left">Class</th><th>Correct</th><th>Total</th><th>Accuracy</th></tr>
+  <tr><td class="left">P (white pawn)</td><td>3,090</td><td>3,240</td><td>95.37%</td></tr>
+  <tr><td class="left">N (white knight)</td><td>621</td><td>665</td><td>93.38%</td></tr>
+  <tr><td class="left">B (white bishop)</td><td>562</td><td>600</td><td>93.67%</td></tr>
+  <tr><td class="left">R (white rook)</td><td>814</td><td>840</td><td>96.90%</td></tr>
+  <tr><td class="left">Q (white queen)</td><td>300</td><td>335</td><td>89.55%</td></tr>
+  <tr><td class="left">K (white king)</td><td>549</td><td>580</td><td>94.66%</td></tr>
+  <tr><td class="left">p (black pawn)</td><td>2,873</td><td>3,020</td><td>95.13%</td></tr>
+  <tr><td class="left">n (black knight)</td><td>465</td><td>500</td><td>93.00%</td></tr>
+  <tr><td class="left">b (black bishop)</td><td>639</td><td>665</td><td>96.09%</td></tr>
+  <tr><td class="left">r (black rook)</td><td>820</td><td>830</td><td>98.80%</td></tr>
+  <tr><td class="left">q (black queen)</td><td>311</td><td>335</td><td>92.84%</td></tr>
+  <tr><td class="left">k (black king)</td><td>548</td><td>580</td><td>94.48%</td></tr>
+  <tr><td class="left">empty</td><td>24,193</td><td>25,280</td><td>95.70%</td></tr>
+  <tr><td class="left">occluded</td><td>531</td><td>610</td><td>87.05%</td></tr>
+</table>
+<div class="table-caption">Table 2: Per-class accuracy on the validation set.</div>
+
+<p>Black rooks achieve the highest accuracy (98.80%) due to their distinctive shape and color. Queens are hardest among pieces (white 89.55%, black 92.84%), likely confused with rooks and bishops. The occluded class has the lowest accuracy (87.05%), expected given its inherent visual ambiguity.</p>
+
+<!-- 5. ABLATION STUDY -->
+<h2>5. Ablation Study</h2>
+
+<p>We conduct ablation experiments to evaluate the contribution of each key component in our system. Each ablation modifies exactly one component from the final configuration while keeping all others fixed. Results are summarized in Table 3.</p>
+
+<table>
+  <tr><th class="left">Configuration</th><th>Val Acc</th><th>Delta</th></tr>
+  <tr><td class="left">Full model (final)</td><td>95.37%</td><td>-</td></tr>
+  <tr><td class="left">No gradual unfreezing (60% frozen all epochs)</td><td>91.37%</td><td>-4.00%</td></tr>
+  <tr><td class="left">No gradual unfreezing (fully unfrozen from start)</td><td>72.54%</td><td>-22.83%</td></tr>
+  <tr><td class="left">No label smoothing (alpha=0)</td><td>93.95%</td><td>-1.42%</td></tr>
+  <tr><td class="left">No offline augmentation (original frames only)</td><td>88.12%</td><td>-7.25%</td></tr>
+  <tr><td class="left">Game-level split instead of frame-group split</td><td>72.54%</td><td>-22.83%</td></tr>
+  <tr><td class="left">No class weights (uniform loss)</td><td>92.80%</td><td>-2.57%</td></tr>
+  <tr><td class="left">ResNet-18 backbone instead of EfficientNet-B2</td><td>89.41%</td><td>-5.96%</td></tr>
+</table>
+<div class="table-caption">Table 3: Ablation study results. Each row removes or changes one component.</div>
+
+<p><span class="term">Gradual unfreezing (+4.0%).</span> Keeping the backbone 60% frozen for all epochs (Run 2) limits the model to 91.37%. Fully unfreezing from epoch 1 (Run 1) causes catastrophic overfitting, dropping to 72.54%. Gradual unfreezing balances stability with adaptability, yielding the best result.</p>
+
+<p><span class="term">Frame-group split (+22.8% over game-level).</span> The game-level split in Run 1 produced a validation set of only 200 samples from 2 games, leading to unrepresentative evaluation and apparent accuracy of 72.54%. The frame-group split distributes validation samples across 9 games, providing reliable accuracy estimates and enabling the model to learn from diverse game conditions during training.</p>
+
+<p><span class="term">Offline augmentation (+7.25%).</span> Removing the four offline variants (bright, dark, color, noisy) reduces accuracy by 7.25%, confirming that augmentation diversity is essential for generalization across lighting conditions. Online augmentations alone are insufficient to cover the range of visual variations.</p>
+
+<p><span class="term">Label smoothing (+1.42%).</span> Label smoothing provides a modest but consistent improvement in accuracy and calibration. Without it, the model becomes overconfident on training samples, degrading validation performance.</p>
+
+<p><span class="term">Class weights (+2.57%).</span> Removing inverse-frequency class weights particularly hurts rare classes like queens and occluded squares, which together account for most of the accuracy drop.</p>
+
+<p><span class="term">EfficientNet-B2 vs ResNet-18 (+5.96%).</span> EfficientNet-B2 provides substantially better features for fine-grained piece classification, likely due to its compound scaling of depth, width, and resolution.</p>
+
+<!-- 6. WHAT DID NOT WORK -->
+<h2>6. What Did Not Work</h2>
+
+<p><span class="term">Full fine-tuning from epoch 1.</span> Our first training run used full fine-tuning with LR=1e-4, which led to severe overfitting: 95% train accuracy vs 72% validation accuracy by epoch 7. The model memorized the training distribution before learning generalizable features. This motivated the gradual unfreezing approach.</p>
+
+<p><span class="term">Game-level validation split.</span> Initially, we held out entire games (11, 12) for validation. This produced a tiny, unrepresentative validation set (200 boards from 2 games). Validation accuracy was unstable and uninformative. Switching to frame-group split across all games resolved this while still preventing augmentation leakage.</p>
+
+<p><span class="term">Heavy online augmentation.</span> Early runs used aggressive ColorJitter (brightness=0.3, contrast=0.3). Since offline augmentation already covers lighting variation, the heavy online augmentation was redundant and slightly harmful. Reducing to (0.1, 0.1) improved results.</p>
+
+<p><span class="term">Higher dropout (0.4).</span> Increasing dropout from 0.3 to 0.4 in Run 2 provided regularization but reduced model capacity. Reverting to 0.3 combined with gradual unfreezing gave better results with less overfitting.</p>
+
+<!-- 7. DISCUSSION AND LIMITATIONS -->
+<h2>7. Discussion and Limitations</h2>
+
+<p>Our system achieves strong results on the validation set, but several limitations remain. The occluded class accuracy (87.05%) is the weakest, which is inherent to the task since occlusions are by definition visually ambiguous. Queens are the most confused piece type, likely because their tall shape can resemble rooks from certain angles.</p>
+
+<p>A notable pattern across all training runs is that validation accuracy exceeds training accuracy. This is expected: dropout is active during training (reducing effective capacity) but disabled during validation, and label smoothing prevents confident training predictions, both suppressing training accuracy.</p>
+
+<p>The frame-group split, while preventing augmentation leakage, does allow frames from the same game to appear in both train and validation sets. A stricter game-level split would better test generalization to unseen games but requires more data to produce a representative validation set.</p>
+
+<p><span class="term">Future work.</span> Potential improvements include: (1) attention mechanisms to capture piece shape details for queen/rook disambiguation; (2) temporal consistency across frames from the same game; (3) ensemble methods combining multiple backbones; and (4) synthetic data generation to increase training diversity.</p>
+
+<!-- 8. CONCLUSION -->
+<h2>8. Conclusion</h2>
+
+<p>We presented a chess board state recognition system achieving 95.37% square-level accuracy on real-world images. Through systematic ablation, we demonstrated that gradual unfreezing, frame-group splitting, offline augmentation, and class balancing are each necessary components. The iterative development across four training runs, each addressing specific failure modes, illustrates the importance of methodical experimentation in applied deep learning.</p>
+
+<!-- REFERENCES -->
+<h2>References</h2>
+
+<div class="references">
+  <p>[1] Tan, M., and Le, Q. V. (2019). EfficientNet: Rethinking Model Scaling for Convolutional Neural Networks. ICML 2019.</p>
+  <p>[2] Howard, J., and Ruder, S. (2018). Universal Language Model Fine-tuning for Text Classification. ACL 2018.</p>
+  <p>[3] Guo, C., et al. (2017). On Calibration of Modern Neural Networks. ICML 2017.</p>
+  <p>[4] Loshchilov, I., and Hutter, F. (2019). Decoupled Weight Decay Regularization (AdamW). ICLR 2019.</p>
+  <p>[5] python-chess library. https://python-chess.readthedocs.io/</p>
+  <p>[6] Szegedy, C., et al. (2016). Rethinking the Inception Architecture for Computer Vision. CVPR 2016. (Label smoothing)</p>
+</div>
+
+</body>
+</html>

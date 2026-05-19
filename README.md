@@ -53,7 +53,7 @@ data/
 Train the model from scratch:
 
 ```bash
-python train.py --data_root data --epochs 50
+python train.py --data_root data --epochs 30
 ```
 
 Key training arguments:
@@ -61,7 +61,7 @@ Key training arguments:
 | Argument | Default | Description |
 |----------|---------|-------------|
 | `--data_root` | (required) | Path to data directory containing game folders |
-| `--epochs` | 50 | Number of training epochs |
+| `--epochs` | 30 | Number of training epochs |
 | `--backbone` | efficientnet_b2 | Model backbone |
 | `--batch_size` | 4 | Batch size (boards) |
 | `--lr` | 5e-5 | Initial learning rate |
@@ -79,7 +79,7 @@ The training script will:
 !git clone https://github.com/yonatanarbel17/deep_learning_project1.git
 %cd deep_learning_project1
 !pip install timm
-!python train.py --data_root data --epochs 50
+!python train.py --data_root data --epochs 30
 ```
 
 ## Demo (Quick Inference)
@@ -126,12 +126,12 @@ Arguments:
 
 Tag occluded squares interactively:
 ```bash
-python tag_occlusions.py --game_dir data/game5_per_frame
+python tag_occlusions.py data/game5_per_frame
 ```
 
 Propagate tags to augmented variants:
 ```bash
-python propagate_occlusions.py --data_root data
+python propagate_occlusions.py
 ```
 
 ## Project Structure
