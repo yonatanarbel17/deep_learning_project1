@@ -23,11 +23,17 @@ from data.data_loader import grid_to_fen, ID_TO_PIECE, NUM_CLASSES
 
 OCCLUDED_CLASS_ID = 13
 
-# Chess piece count constraints (max legal counts per side)
+# Chess piece count constraints (max counts per side).
 # ID mapping: 0=P, 1=N, 2=B, 3=R, 4=Q, 5=K, 6=p, 7=n, 8=b, 9=r, 10=q, 11=k
+#
+# These limits are tighter than the theoretical maxima (e.g. 8 pawns could
+# in principle promote to 8 rooks, so the legal max is 10). In practice
+# promotions are overwhelmingly to a queen, so we cap rooks/bishops at the
+# starting count (2) and leave a small slack for knight underpromotion (3).
+# Queens stay generous (9) to accommodate queen promotions.
 MAX_PIECE_COUNTS = {
-    0: 8, 1: 10, 2: 10, 3: 10, 4: 9, 5: 1,   # White
-    6: 8, 7: 10, 8: 10, 9: 10, 10: 9, 11: 1,  # Black
+    0: 8, 1: 3, 2: 2, 3: 2, 4: 9, 5: 1,   # White: P, N, B, R, Q, K
+    6: 8, 7: 3, 8: 2, 9: 2, 10: 9, 11: 1,  # Black: p, n, b, r, q, k
 }
 
 

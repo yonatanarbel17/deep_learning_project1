@@ -138,7 +138,7 @@ def run_inference(image_path, model_path, output_dir, game_dir=None, frame=None,
     true_fen = None
     if game_dir and frame is not None:
         import pandas as pd
-        from data.data_loader import fen_to_labels
+        from data.data_loader import fen_to_labels, apply_occlusion_to_fen, grid_to_fen
         game_path = Path(game_dir)
         csv_files = list(game_path.glob("*.csv"))
         if csv_files:
@@ -148,17 +148,39 @@ def run_inference(image_path, model_path, output_dir, game_dir=None, frame=None,
                 true_row = df[df[col] == frame]
                 if len(true_row) > 0:
                     true_fen = true_row.iloc[0]['fen']
-                    true_grid = fen_to_labels(true_fen, flatten=False)
+                    occluded_str = ""
+                    if 'occluded' in df.columns:
+                        raw_occ = true_row.iloc[0].get('occluded')
+                        if pd.notna(raw_occ):
+                            occluded_str = str(raw_occ).strip()
+                    # Encode the ground-truth occlusion tags as class 13 in true_grid
+                    fen_with_occ = apply_occlusion_to_fen(true_fen, occluded_str) if occluded_str else true_fen
+                    true_grid = fen_to_labels(fen_with_occ, flatten=False)
                     print(f"Ground Truth FEN: {true_fen}")
-                    print(f"FEN Match: {fen == true_fen}")
+                    if occluded_str:
+                        print(f"Ground Truth occluded squares: {occluded_str}")
 
-                    # Calculate accuracy
+                    # FEN match: compare predicted FEN against ground truth FEN with
+                    # occluded squares rendered as empty (matching how predicted FEN
+                    # treats 'unknown' squares).
+                    true_fen_comparable = grid_to_fen(true_grid)
+                    print(f"FEN Match: {fen == true_fen_comparable}")
+
+                    # Square-level accuracy: a prediction of 'unknown' is counted
+                    # correct when the ground truth marks that square as occluded
+                    # (class 13). This mirrors evaluate_game.py.
+                    OCCLUDED_CLASS_ID = 13
                     correct = 0
                     total = 0
                     for r in range(8):
                         for c in range(8):
                             total += 1
-                            if grid[r, c] != 'unknown' and grid[r, c] == true_grid[r, c]:
+                            pred = grid[r, c]
+                            truth = int(true_grid[r, c])
+                            if pred == 'unknown':
+                                if truth == OCCLUDED_CLASS_ID:
+                                    correct += 1
+                            elif int(pred) == truth:
                                 correct += 1
                     print(f"Square-level Accuracy: {correct/total*100:.2f}% ({correct}/{total})")
 
