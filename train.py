@@ -192,7 +192,7 @@ def main():
                        help="Root directory containing game folders")
     parser.add_argument("--output_dir", type=str, default="outputs",
                        help="Directory to save outputs")
-    parser.add_argument("--epochs", type=int, default=50,
+    parser.add_argument("--epochs", type=int, default=30,
                        help="Number of training epochs")
     parser.add_argument("--batch_size", type=int, default=4,
                        help="Batch size (boards per batch)")

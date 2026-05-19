@@ -138,6 +138,8 @@ python propagate_occlusions.py
 
 ```
 ├── train.py                  # Main training script
+├── predict.py                # Evaluation API: predict_board(image) → 8x8 tensor
+├── demo.py                   # Quick inference on a single image
 ├── evaluate_game.py          # Evaluate model on specific game(s)
 ├── tag_occlusions.py         # Interactive occlusion annotation tool
 ├── propagate_occlusions.py   # Propagate tags to augmented variants
@@ -157,6 +159,8 @@ python propagate_occlusions.py
 │   │   └── trainer.py        # Training loop with gradual unfreezing
 │   └── utils/
 │       └── visualization.py  # Training curves and reports
+├── scripts/
+│   └── plot_run4_curves.py   # Plot training curves for Run 4
 ├── data/                     # Training data (10 games with augmented variants)
 ├── outputs/
 │   └── best_model.pth        # Trained EfficientNet-B2 weights
