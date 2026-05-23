@@ -604,7 +604,7 @@
     <div class="card glow-red">
       <h3 style="color:var(--danger);">Problem: Naive Splitting</h3>
       <ul>
-        <li>Splitting by game gave only 200 val samples from 2 games - too small and unrepresentative</li>
+        <li>Game-level split meant validation covered only 2 out of 10 games, with uneven game sizes (7-186 frames each) sometimes making it too small and unrepresentative</li>
         <li>Random splitting could place an original frame in train and its augmented variant in val - the model memorizes instead of learning</li>
         <li style="color:var(--danger);"><strong>Result:</strong> 95% train vs 72% val accuracy</li>
       </ul>
@@ -613,7 +613,7 @@
       <h3 style="color:var(--accent3);">Solution: Frame-Group Split</h3>
       <ul>
         <li>Group by (game_id, frame) - each frame and all its augmented variants go to the same split</li>
-        <li>20% of frame-groups held for validation → 595 boards from 9 games</li>
+        <li>20% of frame-groups held for validation → 595 boards</li>
         <li style="color:var(--accent3);"><strong>Result:</strong> balanced, representative validation with no data leakage</li>
       </ul>
     </div>
