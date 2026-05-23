@@ -843,110 +843,130 @@
     </div>
   </div>
   <div class="chart-container anim-3">
-    <div class="chart-title">Run 4 — Training &amp; Validation Accuracy (30 Epochs)</div>
-    <svg viewBox="0 0 800 360" preserveAspectRatio="xMidYMid meet" style="height:340px;">
-      <defs>
-        <linearGradient id="valGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="var(--accent3)" stop-opacity="0.28"/>
-          <stop offset="100%" stop-color="var(--accent3)" stop-opacity="0"/>
-        </linearGradient>
-        <linearGradient id="trainGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.20"/>
-          <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
-        </linearGradient>
-      </defs>
-
-      <!-- Gridlines -->
-      <line x1="80" y1="50"  x2="770" y2="50"  stroke="var(--border)" stroke-width="0.6" stroke-dasharray="3 4"/>
-      <line x1="80" y1="108" x2="770" y2="108" stroke="var(--border)" stroke-width="0.6" stroke-dasharray="3 4"/>
-      <line x1="80" y1="165" x2="770" y2="165" stroke="var(--border)" stroke-width="0.6" stroke-dasharray="3 4"/>
-      <line x1="80" y1="223" x2="770" y2="223" stroke="var(--border)" stroke-width="0.6" stroke-dasharray="3 4"/>
-      <line x1="80" y1="281" x2="770" y2="281" stroke="var(--border)" stroke-width="0.6" stroke-dasharray="3 4"/>
-
+    <div class="chart-title">Run 4 - Training &amp; Validation Accuracy (30 Epochs)</div>
+    <svg viewBox="0 0 750 280" style="height:260px;">
       <!-- Axes -->
-      <line x1="80" y1="50"  x2="80"  y2="300" stroke="#cbd5e1" stroke-width="1"/>
-      <line x1="80" y1="300" x2="770" y2="300" stroke="#cbd5e1" stroke-width="1"/>
-
-      <!-- Y axis labels -->
-      <text x="72" y="54"  fill="var(--text-muted)" font-size="11" text-anchor="end">100%</text>
-      <text x="72" y="112" fill="var(--text-muted)" font-size="11" text-anchor="end">85%</text>
-      <text x="72" y="169" fill="var(--text-muted)" font-size="11" text-anchor="end">70%</text>
-      <text x="72" y="227" fill="var(--text-muted)" font-size="11" text-anchor="end">55%</text>
-      <text x="72" y="285" fill="var(--text-muted)" font-size="11" text-anchor="end">40%</text>
-
-      <!-- X axis labels -->
-      <text x="80"  y="318" fill="var(--text-muted)" font-size="11" text-anchor="middle">1</text>
-      <text x="175" y="318" fill="var(--text-muted)" font-size="11" text-anchor="middle">5</text>
-      <text x="294" y="318" fill="var(--text-muted)" font-size="11" text-anchor="middle">10</text>
-      <text x="413" y="318" fill="var(--text-muted)" font-size="11" text-anchor="middle">15</text>
-      <text x="532" y="318" fill="var(--text-muted)" font-size="11" text-anchor="middle">20</text>
-      <text x="651" y="318" fill="var(--text-muted)" font-size="11" text-anchor="middle">25</text>
-      <text x="770" y="318" fill="var(--text-muted)" font-size="11" text-anchor="middle">30</text>
-
-      <!-- Axis titles -->
-      <text x="425" y="345" fill="var(--text-dim)" font-size="13" font-weight="600" text-anchor="middle">Epoch</text>
-      <text x="28"  y="175" fill="var(--text-dim)" font-size="13" font-weight="600" text-anchor="middle" transform="rotate(-90, 28, 175)">Accuracy (%)</text>
-
-      <!-- Area fills -->
-      <path fill="url(#trainGrad)" d="M 80,290 L 104,174 L 128,149 L 151,133 L 175,118 L 199,109 L 223,104 L 247,100 L 270,96 L 294,95 L 318,92 L 342,86 L 366,86 L 389,84 L 413,82 L 437,81 L 461,80 L 484,78 L 508,78 L 532,74 L 556,74 L 580,75 L 603,74 L 627,74 L 651,73 L 675,74 L 699,72 L 722,70 L 746,69 L 770,70 L 770,300 L 80,300 Z"/>
-      <path fill="url(#valGrad)"   d="M 80,164 L 104,140 L 128,129 L 151,115 L 175,103 L 199,92  L 223,89  L 247,87  L 270,86 L 294,84 L 318,79 L 342,79 L 366,79 L 389,77 L 413,76 L 437,73 L 461,72 L 484,72 L 508,72 L 532,71 L 556,73 L 580,71 L 603,72 L 627,70 L 651,69 L 675,69 L 699,69 L 722,69 L 746,69 L 770,68 L 770,300 L 80,300 Z"/>
-
-      <!-- Unfreeze marker + callout (placed below the curves so it never overlaps them) -->
-      <line x1="151" y1="50" x2="151" y2="300" stroke="var(--accent4)" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.7"/>
-      <path d="M 151,200 L 162,196 L 162,204 Z" fill="var(--accent4)" opacity="0.8"/>
-      <rect x="160" y="184" width="208" height="42" rx="8" fill="#fffbeb" stroke="var(--accent4)" stroke-width="1"/>
-      <text x="170" y="203" fill="#92400e" font-size="12" font-weight="700">Backbone unfrozen</text>
-      <text x="170" y="218" fill="#b45309" font-size="10.5">epoch 4 · LR halved (5e-5 → 2.5e-5)</text>
-
-      <!-- Train curve -->
-      <polyline fill="none" stroke="var(--accent)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"
-                points="80,290 104,174 128,149 151,133 175,118 199,109 223,104 247,100 270,96 294,95 318,92 342,86 366,86 389,84 413,82 437,81 461,80 484,78 508,78 532,74 556,74 580,75 603,74 627,74 651,73 675,74 699,72 722,70 746,69 770,70"
-                stroke-dasharray="2400" stroke-dashoffset="2400"
-                style="animation: drawLine 2s cubic-bezier(0.4, 0, 0.2, 1) 0.4s forwards;"/>
-
-      <!-- Validation curve (dashed) -->
-      <polyline fill="none" stroke="var(--accent3)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="7 5"
-                points="80,164 104,140 128,129 151,115 175,103 199,92 223,89 247,87 270,86 294,84 318,79 342,79 366,79 389,77 413,76 437,73 461,72 484,72 508,72 532,71 556,73 580,71 603,72 627,70 651,69 675,69 699,69 722,69 746,69 770,68"
-                opacity="0"
-                style="animation: fadeIn 1s ease 1.6s forwards;"/>
-
-      <!-- Train markers -->
-      <g fill="var(--accent)" opacity="0" style="animation: fadeIn 0.8s ease 1.8s forwards;">
-        <circle cx="80"  cy="290" r="3"/><circle cx="104" cy="174" r="3"/><circle cx="128" cy="149" r="3"/>
-        <circle cx="151" cy="133" r="3"/><circle cx="175" cy="118" r="3"/><circle cx="199" cy="109" r="3"/>
-        <circle cx="223" cy="104" r="3"/><circle cx="247" cy="100" r="3"/><circle cx="270" cy="96"  r="3"/>
-        <circle cx="294" cy="95"  r="3"/><circle cx="318" cy="92"  r="3"/><circle cx="342" cy="86"  r="3"/>
-        <circle cx="366" cy="86"  r="3"/><circle cx="389" cy="84"  r="3"/><circle cx="413" cy="82"  r="3"/>
-        <circle cx="437" cy="81"  r="3"/><circle cx="461" cy="80"  r="3"/><circle cx="484" cy="78"  r="3"/>
-        <circle cx="508" cy="78"  r="3"/><circle cx="532" cy="74"  r="3"/><circle cx="556" cy="74"  r="3"/>
-        <circle cx="580" cy="75"  r="3"/><circle cx="603" cy="74"  r="3"/><circle cx="627" cy="74"  r="3"/>
-        <circle cx="651" cy="73"  r="3"/><circle cx="675" cy="74"  r="3"/><circle cx="699" cy="72"  r="3"/>
-        <circle cx="722" cy="70"  r="3"/><circle cx="746" cy="69"  r="3"/><circle cx="770" cy="70"  r="3"/>
+      <line x1="55" y1="10" x2="55" y2="230" stroke="#cbd5e1" stroke-width="1"/>
+      <line x1="55" y1="230" x2="710" y2="230" stroke="#cbd5e1" stroke-width="1"/>
+      <!-- Y gridlines 30%-100% -->
+      <line x1="55" y1="230" x2="710" y2="230" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="4"/>
+      <line x1="55" y1="198.6" x2="710" y2="198.6" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="4"/>
+      <line x1="55" y1="167.1" x2="710" y2="167.1" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="4"/>
+      <line x1="55" y1="135.7" x2="710" y2="135.7" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="4"/>
+      <line x1="55" y1="104.3" x2="710" y2="104.3" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="4"/>
+      <line x1="55" y1="72.9" x2="710" y2="72.9" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="4"/>
+      <line x1="55" y1="41.4" x2="710" y2="41.4" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="4"/>
+      <line x1="55" y1="10.0" x2="710" y2="10.0" stroke="#e2e8f0" stroke-width="0.5" stroke-dasharray="4"/>
+      <!-- Y labels -->
+      <text x="50" y="234" fill="#64748b" font-size="10" text-anchor="end">30%</text>
+      <text x="50" y="202" fill="#64748b" font-size="10" text-anchor="end">40%</text>
+      <text x="50" y="171" fill="#64748b" font-size="10" text-anchor="end">50%</text>
+      <text x="50" y="139" fill="#64748b" font-size="10" text-anchor="end">60%</text>
+      <text x="50" y="108" fill="#64748b" font-size="10" text-anchor="end">70%</text>
+      <text x="50" y="76" fill="#64748b" font-size="10" text-anchor="end">80%</text>
+      <text x="50" y="45" fill="#64748b" font-size="10" text-anchor="end">90%</text>
+      <text x="50" y="14" fill="#64748b" font-size="10" text-anchor="end">100%</text>
+      <!-- X labels -->
+      <text x="55" y="245" fill="#64748b" font-size="9" text-anchor="middle">1</text>
+      <text x="145.4" y="245" fill="#64748b" font-size="9" text-anchor="middle">5</text>
+      <text x="258.3" y="245" fill="#64748b" font-size="9" text-anchor="middle">10</text>
+      <text x="371.2" y="245" fill="#64748b" font-size="9" text-anchor="middle">15</text>
+      <text x="484.1" y="245" fill="#64748b" font-size="9" text-anchor="middle">20</text>
+      <text x="597.1" y="245" fill="#64748b" font-size="9" text-anchor="middle">25</text>
+      <text x="710" y="245" fill="#64748b" font-size="9" text-anchor="middle">30</text>
+      <!-- Axis labels -->
+      <text x="382" y="265" fill="#64748b" font-size="11" text-anchor="middle">Epoch</text>
+      <text x="14" y="125" fill="#64748b" font-size="11" text-anchor="middle" transform="rotate(-90,14,125)">Accuracy (%)</text>
+      <!-- Unfreeze line at epoch 3.5 -->
+      <line x1="111.5" y1="10" x2="111.5" y2="230" stroke="var(--accent4)" stroke-width="1.5" stroke-dasharray="4,4" opacity="0.7"/>
+      <text x="115" y="22" fill="var(--accent4)" font-size="9" font-weight="500">Backbone unfrozen</text>
+      <text x="115" y="32" fill="var(--accent4)" font-size="8">(epoch 4, LR halved)</text>
+      <!-- Validation line (dashed green with square markers) -->
+      <polyline fill="none" stroke="var(--accent3)" stroke-width="2.5" stroke-dasharray="8,4"
+        points="55,103.6 77.6,84.0 100.1,76.3 122.7,65.6 145.3,56.2 167.8,49.3 190.4,47.0 213.0,45.6 235.5,44.5 258.1,43.1 280.7,40.1 303.2,39.9 325.8,39.7 348.4,38.6 370.9,37.7 393.5,36.2 416.1,35.2 438.6,35.6 461.2,34.9 483.8,34.9 506.3,35.7 528.9,34.9 551.5,34.9 574.0,33.9 596.6,33.3 619.2,33.3 641.7,33.2 664.3,33.3 686.8,33.0 710.0,32.3"
+        stroke-dasharray="1200" stroke-dashoffset="1200" style="animation: drawLine 2s ease 0.5s forwards;"/>
+      <!-- Train line (solid blue with circle markers) -->
+      <polyline fill="none" stroke="var(--accent)" stroke-width="2.5"
+        points="55,197.6 77.6,110.6 100.1,92.5 122.7,81.8 145.3,72.1 167.8,65.8 190.4,63.1 213.0,60.4 235.5,57.6 258.1,57.0 280.7,54.7 303.2,50.9 325.8,50.7 348.4,49.6 370.9,48.5 393.5,47.9 416.1,46.6 438.6,45.6 461.2,45.3 483.8,42.8 506.3,42.5 528.9,43.2 551.5,42.8 574.0,42.3 596.6,41.9 619.2,42.5 641.7,41.3 664.3,39.6 686.8,39.3 710.0,40.1"
+        stroke-dasharray="1200" stroke-dashoffset="1200" style="animation: drawLine 2s ease 0.7s forwards;"/>
+      <!-- Val square markers -->
+      <g opacity="0" style="animation: fadeIn 0.3s ease 1.5s forwards;">
+        <rect x="52" y="100.6" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="74.6" y="81.0" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="97.1" y="73.3" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="119.7" y="62.6" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="142.3" y="53.2" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="164.8" y="46.3" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="187.4" y="44.0" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="210.0" y="42.6" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="232.5" y="41.5" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="255.1" y="40.1" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="277.7" y="37.1" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="300.2" y="36.9" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="322.8" y="36.7" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="345.4" y="35.6" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="367.9" y="34.7" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="390.5" y="33.2" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="413.1" y="32.2" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="435.6" y="32.6" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="458.2" y="31.9" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="480.8" y="31.9" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="503.3" y="32.7" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="525.9" y="31.9" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="548.5" y="31.9" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="571.0" y="30.9" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="593.6" y="30.3" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="616.2" y="30.3" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="638.7" y="30.2" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="661.3" y="30.3" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="683.8" y="30.0" width="6" height="6" fill="var(--accent3)"/>
+        <rect x="707.0" y="29.3" width="6" height="6" fill="var(--accent3)"/>
       </g>
-
-      <!-- Validation markers -->
-      <g fill="var(--accent3)" opacity="0" style="animation: fadeIn 0.8s ease 1.9s forwards;">
-        <rect x="77"  y="161" width="6" height="6" rx="1"/><rect x="101" y="137" width="6" height="6" rx="1"/><rect x="125" y="126" width="6" height="6" rx="1"/>
-        <rect x="148" y="112" width="6" height="6" rx="1"/><rect x="172" y="100" width="6" height="6" rx="1"/><rect x="196" y="89"  width="6" height="6" rx="1"/>
-        <rect x="220" y="86"  width="6" height="6" rx="1"/><rect x="244" y="84"  width="6" height="6" rx="1"/><rect x="267" y="83"  width="6" height="6" rx="1"/>
-        <rect x="291" y="81"  width="6" height="6" rx="1"/><rect x="315" y="76"  width="6" height="6" rx="1"/><rect x="339" y="76"  width="6" height="6" rx="1"/>
-        <rect x="363" y="76"  width="6" height="6" rx="1"/><rect x="386" y="74"  width="6" height="6" rx="1"/><rect x="410" y="73"  width="6" height="6" rx="1"/>
-        <rect x="434" y="70"  width="6" height="6" rx="1"/><rect x="458" y="69"  width="6" height="6" rx="1"/><rect x="481" y="69"  width="6" height="6" rx="1"/>
-        <rect x="505" y="69"  width="6" height="6" rx="1"/><rect x="529" y="68"  width="6" height="6" rx="1"/><rect x="553" y="70"  width="6" height="6" rx="1"/>
-        <rect x="577" y="68"  width="6" height="6" rx="1"/><rect x="600" y="69"  width="6" height="6" rx="1"/><rect x="624" y="67"  width="6" height="6" rx="1"/>
-        <rect x="648" y="66"  width="6" height="6" rx="1"/><rect x="672" y="66"  width="6" height="6" rx="1"/><rect x="696" y="66"  width="6" height="6" rx="1"/>
-        <rect x="719" y="66"  width="6" height="6" rx="1"/><rect x="743" y="66"  width="6" height="6" rx="1"/><rect x="767" y="65"  width="6" height="6" rx="1"/>
+      <!-- Train circle markers -->
+      <g opacity="0" style="animation: fadeIn 0.3s ease 1.6s forwards;">
+        <circle cx="55" cy="197.6" r="3.5" fill="var(--accent)"/>
+        <circle cx="77.6" cy="110.6" r="3.5" fill="var(--accent)"/>
+        <circle cx="100.1" cy="92.5" r="3.5" fill="var(--accent)"/>
+        <circle cx="122.7" cy="81.8" r="3.5" fill="var(--accent)"/>
+        <circle cx="145.3" cy="72.1" r="3.5" fill="var(--accent)"/>
+        <circle cx="167.8" cy="65.8" r="3.5" fill="var(--accent)"/>
+        <circle cx="190.4" cy="63.1" r="3.5" fill="var(--accent)"/>
+        <circle cx="213.0" cy="60.4" r="3.5" fill="var(--accent)"/>
+        <circle cx="235.5" cy="57.6" r="3.5" fill="var(--accent)"/>
+        <circle cx="258.1" cy="57.0" r="3.5" fill="var(--accent)"/>
+        <circle cx="280.7" cy="54.7" r="3.5" fill="var(--accent)"/>
+        <circle cx="303.2" cy="50.9" r="3.5" fill="var(--accent)"/>
+        <circle cx="325.8" cy="50.7" r="3.5" fill="var(--accent)"/>
+        <circle cx="348.4" cy="49.6" r="3.5" fill="var(--accent)"/>
+        <circle cx="370.9" cy="48.5" r="3.5" fill="var(--accent)"/>
+        <circle cx="393.5" cy="47.9" r="3.5" fill="var(--accent)"/>
+        <circle cx="416.1" cy="46.6" r="3.5" fill="var(--accent)"/>
+        <circle cx="438.6" cy="45.6" r="3.5" fill="var(--accent)"/>
+        <circle cx="461.2" cy="45.3" r="3.5" fill="var(--accent)"/>
+        <circle cx="483.8" cy="42.8" r="3.5" fill="var(--accent)"/>
+        <circle cx="506.3" cy="42.5" r="3.5" fill="var(--accent)"/>
+        <circle cx="528.9" cy="43.2" r="3.5" fill="var(--accent)"/>
+        <circle cx="551.5" cy="42.8" r="3.5" fill="var(--accent)"/>
+        <circle cx="574.0" cy="42.3" r="3.5" fill="var(--accent)"/>
+        <circle cx="596.6" cy="41.9" r="3.5" fill="var(--accent)"/>
+        <circle cx="619.2" cy="42.5" r="3.5" fill="var(--accent)"/>
+        <circle cx="641.7" cy="41.3" r="3.5" fill="var(--accent)"/>
+        <circle cx="664.3" cy="39.6" r="3.5" fill="var(--accent)"/>
+        <circle cx="686.8" cy="39.3" r="3.5" fill="var(--accent)"/>
+        <circle cx="710.0" cy="40.1" r="3.5" fill="var(--accent)"/>
       </g>
-
-      <!-- Best 95.37% callout -->
-      <g opacity="0" style="animation: fadeIn 0.6s ease 2.4s forwards;">
-        <circle cx="770" cy="68" r="7" fill="none" stroke="var(--accent3)" stroke-width="2.5"/>
-        <path d="M 685,48 Q 730,46 760,62" fill="none" stroke="var(--accent3)" stroke-width="1.5" stroke-dasharray="3 3" opacity="0.7"/>
-        <rect x="558" y="22" width="128" height="38" rx="7" fill="#ecfdf5" stroke="var(--accent3)" stroke-width="1"/>
-        <text x="622" y="40" fill="#065f46" font-size="12" font-weight="700" text-anchor="middle">Best: 95.37%</text>
-        <text x="622" y="54" fill="#047857" font-size="10.5" text-anchor="middle">(Epoch 30)</text>
-      </g>
-    </svg>
+      <!-- Best annotation -->
+      <circle cx="710" cy="32.3" r="6" fill="none" stroke="var(--accent3)" stroke-width="2" opacity="0" style="animation: fadeIn 0.3s ease 1.8s forwards;"/>
+      <text x="640" y="16" fill="var(--accent3)" font-size="11" font-weight="700" opacity="0" style="animation: fadeIn 0.3s ease 1.8s forwards;">Best: 95.37%</text>
+      <text x="652" y="27" fill="var(--accent3)" font-size="9" opacity="0" style="animation: fadeIn 0.3s ease 1.8s forwards;">(Epoch 30)</text>
+      <!-- Legend -->
+      <rect x="545" y="185" width="160" height="42" rx="4" fill="white" stroke="#e2e8f0" stroke-width="1"/>
+      <line x1="553" y1="200" x2="573" y2="200" stroke="var(--accent)" stroke-width="2.5"/>
+      <circle cx="563" cy="200" r="3" fill="var(--accent)"/>
+      <text x="579" y="204" fill="var(--text)" font-size="10">Train Accuracy</text>
+      <line x1="553" y1="218" x2="573" y2="218" stroke="var(--accent3)" stroke-width="2.5" stroke-dasharray="6,3"/>
+      <rect x="559" y="214" width="7" height="7" fill="var(--accent3)"/>
+      <text x="579" y="222" fill="var(--text)" font-size="10">Validation Accuracy</text>    </svg>
     <div class="chart-legend">
       <div class="legend-item"><div class="legend-dot" style="background:var(--accent);"></div> Train Accuracy</div>
       <div class="legend-item"><div class="legend-dot" style="background:var(--accent3);"></div> Validation Accuracy</div>
