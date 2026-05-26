@@ -662,7 +662,7 @@
     </div>
     <div class="card">
       <h3 style="color:var(--accent2);">CrossEntropy Loss</h3>
-      <p>Label smoothing (0.1) + inverse-frequency class weights for rare pieces</p>
+      <p>Label smoothing (0.1)</p>
     </div>
     <div class="card">
       <h3 style="color:var(--accent3);">Dropout (0.3)</h3>
@@ -943,6 +943,35 @@
   <div class="slide-num"></div>
 </div>
 
+
+<!-- ==================== SLIDE 12: FAILED EXPERIMENTS ==================== -->
+<div class="slide v-center" id="s12">
+  <h2 class="anim-1">What <span class="gradient-warm">Didn't Work</span></h2>
+  <div class="grid-2 anim-2">
+    <div>
+      <div class="fail-item">
+        <h4>ResNet-18 Backbone</h4>
+        <p>Too weak for fine-grained piece classification. EfficientNet-B2 gave +6% accuracy.</p>
+      </div>
+      <div class="fail-item">
+        <h4>Full Fine-Tuning from Start</h4>
+        <p>Catastrophic forgetting destroyed ImageNet features. 95% train vs 72% val.</p>
+      </div>
+    </div>
+    <div>
+      <div class="fail-item">
+        <h4>Heavy Augmentation</h4>
+        <p>Strong ColorJitter overlapped with offline variants, creating unrealistic images. Reducing to mild values improved results.</p>
+      </div>
+      <div class="fail-item">
+        <h4>Higher Dropout (0.4)</h4>
+        <p>Reduced model capacity without enough regularization benefit. Reverting to 0.3 with gradual unfreezing worked better.</p>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num"></div>
+</div>
+
 <!-- ==================== SLIDE 8: INFERENCE ==================== -->
 <div class="slide v-center" id="s8">
   <h2 class="anim-1"><span class="gradient-text">Inference</span> Pipeline</h2>
@@ -1025,34 +1054,6 @@
   <div class="slide-num"></div>
 </div>
 
-
-<!-- ==================== SLIDE 12: FAILED EXPERIMENTS ==================== -->
-<div class="slide v-center" id="s12">
-  <h2 class="anim-1">What <span class="gradient-warm">Didn't Work</span></h2>
-  <div class="grid-2 anim-2">
-    <div>
-      <div class="fail-item">
-        <h4>ResNet-18 Backbone</h4>
-        <p>Too weak for fine-grained piece classification. EfficientNet-B2 gave +6% accuracy.</p>
-      </div>
-      <div class="fail-item">
-        <h4>Full Fine-Tuning from Start</h4>
-        <p>Catastrophic forgetting destroyed ImageNet features. 95% train vs 72% val.</p>
-      </div>
-    </div>
-    <div>
-      <div class="fail-item">
-        <h4>Heavy Augmentation</h4>
-        <p>Strong ColorJitter overlapped with offline variants, creating unrealistic images. Reducing to mild values improved results.</p>
-      </div>
-      <div class="fail-item">
-        <h4>Higher Dropout (0.4)</h4>
-        <p>Reduced model capacity without enough regularization benefit. Reverting to 0.3 with gradual unfreezing worked better.</p>
-      </div>
-    </div>
-  </div>
-  <div class="slide-num"></div>
-</div>
 
 <!-- ==================== SLIDE 13: TAKEAWAYS ==================== -->
 <div class="slide v-center" id="s13">
