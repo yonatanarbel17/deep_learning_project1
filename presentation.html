@@ -730,87 +730,6 @@
   <div class="slide-num"></div>
 </div>
 
-<!-- ==================== SLIDE 8: INFERENCE ==================== -->
-<div class="slide v-center" id="s8">
-  <h2 class="anim-1"><span class="gradient-text">Inference</span> Pipeline</h2>
-  <div class="pipeline anim-2" style="margin:30px 0;">
-    <div class="pipe-step"><div class="pipe-icon">🧠</div><div class="pipe-title">Model</div><div class="pipe-sub">Raw logits</div></div>
-    <div class="pipe-arrow">→</div>
-    <div class="pipe-step" style="border-color:var(--accent2);"><div class="pipe-icon">🌡️</div><div class="pipe-title">Temperature</div><div class="pipe-sub">T = 1.24</div></div>
-    <div class="pipe-arrow">→</div>
-    <div class="pipe-step"><div class="pipe-icon">📊</div><div class="pipe-title">Softmax</div><div class="pipe-sub">Calibrated probs</div></div>
-    <div class="pipe-arrow">→</div>
-    <div class="pipe-step" style="border-color:var(--danger);"><div class="pipe-icon">🚫</div><div class="pipe-title">OOD Check</div><div class="pipe-sub">threshold = 0.1</div></div>
-    <div class="pipe-arrow">→</div>
-    <div class="pipe-step" style="border-color:var(--accent3);"><div class="pipe-icon">♚</div><div class="pipe-title">Chess Rules</div><div class="pipe-sub">Post-process</div></div>
-    <div class="pipe-arrow">→</div>
-    <div class="pipe-step active-step"><div class="pipe-icon">📋</div><div class="pipe-title">FEN</div></div>
-  </div>
-  <div class="grid-3 anim-3">
-    <div class="card" style="border-top:3px solid var(--accent2);">
-      <h3 style="color:var(--accent2);">Temperature Scaling</h3>
-      <p>Divides logits by T=1.24 before softmax - calibrates confidence so probabilities reflect true accuracy</p>
-      <p style="margin-top:8px; font-size:0.9em;"><strong>Optimized via L-BFGS</strong> on validation set</p>
-    </div>
-    <div class="card" style="border-top:3px solid var(--danger);">
-      <h3 style="color:var(--danger);">OOD Thresholding</h3>
-      <p>If max softmax probability < 0.1, the square is classified as <strong>occluded</strong> (class 13)</p>
-      <p style="margin-top:8px; font-size:0.9em;"><strong>Dual defense:</strong> supervised class + confidence gate</p>
-    </div>
-    <div class="card" style="border-top:3px solid var(--accent3);">
-      <h3 style="color:var(--accent3);">Chess Rules</h3>
-      <ul>
-        <li>No pawns on ranks 1 or 8</li>
-        <li>Exactly one king per side</li>
-        <li>Piece counts within legal limits</li>
-      </ul>
-    </div>
-  </div>
-  <div class="slide-num"></div>
-</div>
-
-<!-- ==================== SLIDE 10: QUANTITATIVE RESULTS ==================== -->
-<div class="slide" id="s9">
-  <h2 class="anim-1"><span class="gradient-green">Quantitative</span> Results</h2>
-  <div class="grid-2">
-    <div class="anim-left">
-      <div class="center" style="margin-bottom:20px;">
-        <div class="big-stat gradient-green">95.37%</div>
-        <div class="stat-label">Overall Validation Accuracy</div>
-      </div>
-      <div class="bar-chart">
-        <div class="bar-row"><span class="bar-label">Black Rook</span><div class="bar-track"><div class="bar-fill green" style="width:98.8%;">98.8%</div></div></div>
-        <div class="bar-row"><span class="bar-label">White Rook</span><div class="bar-track"><div class="bar-fill green" style="width:96.9%;">96.9%</div></div></div>
-        <div class="bar-row"><span class="bar-label">Black Bishop</span><div class="bar-track"><div class="bar-fill green" style="width:96.1%;">96.1%</div></div></div>
-        <div class="bar-row"><span class="bar-label">Empty</span><div class="bar-track"><div class="bar-fill blue" style="width:95.7%;">95.7%</div></div></div>
-        <div class="bar-row"><span class="bar-label">Pawns</span><div class="bar-track"><div class="bar-fill blue" style="width:95.3%;">~95%</div></div></div>
-        <div class="bar-row"><span class="bar-label">Kings</span><div class="bar-track"><div class="bar-fill blue" style="width:94.6%;">~94.5%</div></div></div>
-        <div class="bar-row"><span class="bar-label">Knights</span><div class="bar-track"><div class="bar-fill yellow" style="width:93.2%;">~93%</div></div></div>
-        <div class="bar-row"><span class="bar-label">Bishops</span><div class="bar-track"><div class="bar-fill yellow" style="width:93.7%;">~94%</div></div></div>
-        <div class="bar-row"><span class="bar-label">Queens</span><div class="bar-track"><div class="bar-fill red" style="width:91.2%;">~91%</div></div></div>
-        <div class="bar-row"><span class="bar-label">Occluded</span><div class="bar-track"><div class="bar-fill red" style="width:87.1%;">87.1%</div></div></div>
-      </div>
-    </div>
-    <div class="anim-right">
-      <div class="card glow-green" style="margin-bottom:16px;">
-        <h3 style="color:var(--accent3);">Strengths</h3>
-        <ul>
-          <li><strong>Rooks</strong> (96-99%): distinctive castle shape</li>
-          <li><strong>Pawns</strong> (95%+): abundant, consistent shape</li>
-          <li>Overfit gap: <strong>-0.62%</strong> (val > train)</li>
-        </ul>
-      </div>
-      <div class="card glow-red">
-        <h3 style="color:var(--danger);">Weaknesses</h3>
-        <ul>
-          <li><strong>Queens</strong> (~91%): confused with rooks/bishops</li>
-          <li><strong>Occluded</strong> (87%): inherently ambiguous</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-  <div class="slide-num"></div>
-</div>
 
 <!-- ==================== SLIDE 10: TRAINING EVOLUTION ==================== -->
 <div class="slide v-center" id="s10">
@@ -1023,6 +942,89 @@
   </div>
   <div class="slide-num"></div>
 </div>
+
+<!-- ==================== SLIDE 8: INFERENCE ==================== -->
+<div class="slide v-center" id="s8">
+  <h2 class="anim-1"><span class="gradient-text">Inference</span> Pipeline</h2>
+  <div class="pipeline anim-2" style="margin:30px 0;">
+    <div class="pipe-step"><div class="pipe-icon">🧠</div><div class="pipe-title">Model</div><div class="pipe-sub">Raw logits</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step" style="border-color:var(--accent2);"><div class="pipe-icon">🌡️</div><div class="pipe-title">Temperature</div><div class="pipe-sub">T = 1.24</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="pipe-icon">📊</div><div class="pipe-title">Softmax</div><div class="pipe-sub">Calibrated probs</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step" style="border-color:var(--danger);"><div class="pipe-icon">🚫</div><div class="pipe-title">OOD Check</div><div class="pipe-sub">threshold = 0.1</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step" style="border-color:var(--accent3);"><div class="pipe-icon">♚</div><div class="pipe-title">Chess Rules</div><div class="pipe-sub">Post-process</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step active-step"><div class="pipe-icon">📋</div><div class="pipe-title">FEN</div></div>
+  </div>
+  <div class="grid-3 anim-3">
+    <div class="card" style="border-top:3px solid var(--accent2);">
+      <h3 style="color:var(--accent2);">Temperature Scaling</h3>
+      <p>Divides logits by T=1.24 before softmax - calibrates confidence so probabilities reflect true accuracy</p>
+      <p style="margin-top:8px; font-size:0.9em;"><strong>Optimized via L-BFGS</strong> on validation set</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--danger);">
+      <h3 style="color:var(--danger);">OOD Thresholding</h3>
+      <p>If max softmax probability < 0.1, the square is classified as <strong>occluded</strong> (class 13)</p>
+      <p style="margin-top:8px; font-size:0.9em;"><strong>Dual defense:</strong> supervised class + confidence gate</p>
+    </div>
+    <div class="card" style="border-top:3px solid var(--accent3);">
+      <h3 style="color:var(--accent3);">Chess Rules</h3>
+      <ul>
+        <li>No pawns on ranks 1 or 8</li>
+        <li>Exactly one king per side</li>
+        <li>Piece counts within legal limits</li>
+      </ul>
+    </div>
+  </div>
+  <div class="slide-num"></div>
+</div>
+
+<!-- ==================== SLIDE 10: QUANTITATIVE RESULTS ==================== -->
+<div class="slide" id="s9">
+  <h2 class="anim-1"><span class="gradient-green">Quantitative</span> Results</h2>
+  <div class="grid-2">
+    <div class="anim-left">
+      <div class="center" style="margin-bottom:20px;">
+        <div class="big-stat gradient-green">95.37%</div>
+        <div class="stat-label">Overall Validation Accuracy</div>
+      </div>
+      <div class="bar-chart">
+        <div class="bar-row"><span class="bar-label">Black Rook</span><div class="bar-track"><div class="bar-fill green" style="width:98.8%;">98.8%</div></div></div>
+        <div class="bar-row"><span class="bar-label">White Rook</span><div class="bar-track"><div class="bar-fill green" style="width:96.9%;">96.9%</div></div></div>
+        <div class="bar-row"><span class="bar-label">Black Bishop</span><div class="bar-track"><div class="bar-fill green" style="width:96.1%;">96.1%</div></div></div>
+        <div class="bar-row"><span class="bar-label">Empty</span><div class="bar-track"><div class="bar-fill blue" style="width:95.7%;">95.7%</div></div></div>
+        <div class="bar-row"><span class="bar-label">Pawns</span><div class="bar-track"><div class="bar-fill blue" style="width:95.3%;">~95%</div></div></div>
+        <div class="bar-row"><span class="bar-label">Kings</span><div class="bar-track"><div class="bar-fill blue" style="width:94.6%;">~94.5%</div></div></div>
+        <div class="bar-row"><span class="bar-label">Knights</span><div class="bar-track"><div class="bar-fill yellow" style="width:93.2%;">~93%</div></div></div>
+        <div class="bar-row"><span class="bar-label">Bishops</span><div class="bar-track"><div class="bar-fill yellow" style="width:93.7%;">~94%</div></div></div>
+        <div class="bar-row"><span class="bar-label">Queens</span><div class="bar-track"><div class="bar-fill red" style="width:91.2%;">~91%</div></div></div>
+        <div class="bar-row"><span class="bar-label">Occluded</span><div class="bar-track"><div class="bar-fill red" style="width:87.1%;">87.1%</div></div></div>
+      </div>
+    </div>
+    <div class="anim-right">
+      <div class="card glow-green" style="margin-bottom:16px;">
+        <h3 style="color:var(--accent3);">Strengths</h3>
+        <ul>
+          <li><strong>Rooks</strong> (96-99%): distinctive castle shape</li>
+          <li><strong>Pawns</strong> (95%+): abundant, consistent shape</li>
+          <li>Overfit gap: <strong>-0.62%</strong> (val > train)</li>
+        </ul>
+      </div>
+      <div class="card glow-red">
+        <h3 style="color:var(--danger);">Weaknesses</h3>
+        <ul>
+          <li><strong>Queens</strong> (~91%): confused with rooks/bishops</li>
+          <li><strong>Occluded</strong> (87%): inherently ambiguous</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="slide-num"></div>
+</div>
+
 
 <!-- ==================== SLIDE 12: FAILED EXPERIMENTS ==================== -->
 <div class="slide v-center" id="s12">
